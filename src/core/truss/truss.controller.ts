@@ -16,7 +16,7 @@ export class trussController extends trussService {
     }
     private getTrussController() {
         return async (_req: Request, res: Response) => {
-            const trussArr = await this.getDataFromCollection();
+            const trussArr = await this.aggregateTrussAndPlant();
             res.send(trussArr);
         }
     }

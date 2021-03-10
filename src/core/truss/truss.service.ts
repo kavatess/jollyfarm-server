@@ -6,6 +6,21 @@ export class trussService extends mongoDB_Collection {
     protected constructor() {
         super(mongoDatabase.getDB(), "truss-data")
     }
+    protected async aggregateTrussAndPlant() {
+        const aggregateMethod = [{
+            $lookup: {
+                from: "plant-data",
+                localField: "plantId",    // field in the orders collection
+                foreignField: "plantId",  // field in the items collection
+                as: "fromItems"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$fromItems", 0] }, "$$ROOT"] } }
+        },
+        { $project: { fromItems: 0 } }]
+        return await this.lookUpMultipleData(aggregateMethod);
+    }
     protected async updateTrussStatus(newStatus: newStatusRequestModel) {
         const updateVal = { $set: { statusReal: newStatus.statusReal } };
         return await this.updateOne(newStatus._id, updateVal);

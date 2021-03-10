@@ -15,7 +15,7 @@ export class mongoDB_Collection {
     protected async getDataFromCollection(findCond = {}) {
         try {
             const collection = await this.getCollection();
-            return collection.find(findCond).toArray();
+            return await collection.find(findCond).toArray();
         } catch (err) {
             console.log(err);
             return new Error(err);
@@ -24,7 +24,7 @@ export class mongoDB_Collection {
     protected async insertOne(obj: any) {
         try {
             const collection = await this.getCollection();
-            return collection.insertOne(obj);
+            return await collection.insertOne(obj);
         } catch (err) {
             console.log(err);
             return new Error(err);
@@ -33,7 +33,7 @@ export class mongoDB_Collection {
     protected async insertMany(objArr: any[]) {
         try {
             const collection = await this.getCollection();
-            return collection.insertMany(objArr);
+            return await collection.insertMany(objArr);
         } catch (err) {
             console.log(err);
             return new Error(err);
@@ -43,7 +43,7 @@ export class mongoDB_Collection {
         try {
             const collection = await this.getCollection();
             const deleteCond = { _id: new ObjectId(deletedObjId) };
-            return collection.deleteOne(deleteCond);
+            return await collection.deleteOne(deleteCond);
         } catch (err) {
             console.log(err);
             return new Error(err);
@@ -54,7 +54,7 @@ export class mongoDB_Collection {
             const collection = await this.getCollection();
             const deletedIdArr = deletedObjIdArr.map(id => new ObjectId(id));
             const deleteCond = { _id: { $in: deletedIdArr } };
-            return collection.deleteMany(deleteCond);
+            return await collection.deleteMany(deleteCond);
         } catch (err) {
             console.log(err);
             return new Error(err);
@@ -64,13 +64,19 @@ export class mongoDB_Collection {
         try {
             const collection = await this.getCollection();
             const findCond = { _id: new ObjectId(updatedObjId) };
-            return collection.updateOne(findCond, updateVal);
+            return await collection.updateOne(findCond, updateVal);
         } catch (err) {
             console.log(err);
             return new Error(err);
         }
     }
-    protected async lookUpMultipleData(aggregateMethod: CollectionAggregationOptions) {
-
+    protected async lookUpMultipleData(aggregateMethod: any) {
+        try {
+            const collection = await this.getCollection();
+            return await collection.aggregate(aggregateMethod).toArray();
+        } catch (err) {
+            console.log(err);
+            return new Error(err);
+        }
     }
 }

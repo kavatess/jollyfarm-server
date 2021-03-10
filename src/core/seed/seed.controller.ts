@@ -15,7 +15,7 @@ export class seedController extends seedService {
     }
     private getSeedDataController() {
         return async (_req: Request, res: Response) => {
-            const seedArr = await this.getDataFromCollection();
+            const seedArr = await this.aggregateSeedAndPlant();
             res.send(seedArr);
         }
     }
@@ -42,7 +42,7 @@ export class seedController extends seedService {
     }
     private deleteSeedWhenCreateTruss() {
         return async (req: Request, res: Response) => {
-            const deletedSeedId: string = req.body._id;
+            const deletedSeedId: string = req.body.createdSeedId;
             const response = await this.deleteOne(deletedSeedId);
             res.send(response);
         }
