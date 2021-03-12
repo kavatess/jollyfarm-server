@@ -1,19 +1,23 @@
 import { mongoDB_Collection } from "../../configs/collection-access.mongodb";
 import { mongoDatabase } from "../../configs/connect.mongodb";
-import { plantModel } from "./plant.model";
+import { Plant } from "./plant.model";
 
 export class plantService extends mongoDB_Collection {
     protected constructor() {
-        super(mongoDatabase.getDB(), "plant-data")
+        super(mongoDatabase.getDB(), "plant")
     }
-    protected async updatePlant(updatedObj: plantModel): Promise<any> {
+    protected async updatePlant(updatedObj: Plant): Promise<any> {
         const updateVal = {
             $set: {
                 plantName: updatedObj.plantName,
                 plantColor: updatedObj.plantColor,
-                suPhatTrien: updatedObj.suPhatTrien,
-                SoCay1Kg: updatedObj.SoCay1Kg,
-                SauBenh: updatedObj.SauBenh
+                growUpTime: updatedObj.growUpTime,
+                mediumGrowthTime: updatedObj.mediumGrowthTime,
+                seedUpTime: updatedObj.seedUpTime,
+                numberPerKg: updatedObj.numberPerKg,
+                alivePercent: updatedObj.alivePercent,
+                worm: updatedObj.worm,
+                wormMonth: updatedObj.wormMonth
             }
         }
         return await this.updateOne(updatedObj._id, updateVal);

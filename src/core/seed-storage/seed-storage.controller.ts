@@ -1,6 +1,6 @@
 import * as express from "express";
 import { Router, Request, Response } from "express";
-import { seedModel } from "../seed/seed.model";
+import { Seed } from "../seed/seed.model";
 import { seedStorageService } from "./seed-storage.service";
 
 export class seedStorageController extends seedStorageService {
@@ -11,7 +11,7 @@ export class seedStorageController extends seedStorageService {
     }
     private insertSeedService() {
         return async (req: Request, res: Response) => {
-            const addedSeedArr: seedModel[] = req.body;
+            const addedSeedArr: Seed[] = req.body;
             const response = await this.insertMany(addedSeedArr);
             res.send(response);
         }

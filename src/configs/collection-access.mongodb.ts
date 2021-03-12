@@ -1,10 +1,12 @@
-import { Collection, Db, ObjectId, CollectionAggregationOptions } from "mongodb";
+import { Collection, Db, ObjectId } from "mongodb";
 
 export class mongoDB_Collection {
     private collection!: Collection;
+
     protected constructor(private database: Promise<Db>, private colName: string) {
         this.getCollection();
     }
+
     protected async getCollection() {
         if (!this.collection) {
             const db = await this.database;
@@ -12,33 +14,35 @@ export class mongoDB_Collection {
         }
         return this.collection;
     }
-    protected async getDataFromCollection(findCond = {}) {
+
+    protected async getDataFromCollection(findCond = {}): Promise<any[]> {
         try {
             const collection = await this.getCollection();
             return await collection.find(findCond).toArray();
         } catch (err) {
             console.log(err);
-            return new Error(err);
+            return [];
         }
     }
+
     protected async insertOne(obj: any) {
         try {
             const collection = await this.getCollection();
             return await collection.insertOne(obj);
         } catch (err) {
             console.log(err);
-            return new Error(err);
         }
     }
+
     protected async insertMany(objArr: any[]) {
         try {
             const collection = await this.getCollection();
             return await collection.insertMany(objArr);
         } catch (err) {
             console.log(err);
-            return new Error(err);
         }
     }
+
     protected async deleteOne(deletedObjId: string) {
         try {
             const collection = await this.getCollection();
@@ -46,9 +50,9 @@ export class mongoDB_Collection {
             return await collection.deleteOne(deleteCond);
         } catch (err) {
             console.log(err);
-            return new Error(err);
         }
     }
+
     protected async deleteMany(deletedObjIdArr: string[]) {
         try {
             const collection = await this.getCollection();
@@ -57,9 +61,9 @@ export class mongoDB_Collection {
             return await collection.deleteMany(deleteCond);
         } catch (err) {
             console.log(err);
-            return new Error(err);
         }
     }
+
     protected async updateOne(updatedObjId: string, updateVal: any) {
         try {
             const collection = await this.getCollection();
@@ -67,16 +71,28 @@ export class mongoDB_Collection {
             return await collection.updateOne(findCond, updateVal);
         } catch (err) {
             console.log(err);
-            return new Error(err);
         }
     }
-    protected async lookUpMultipleData(aggregateMethod: any) {
+
+    protected async joinWithPlantData(): Promise<any[]> {
         try {
             const collection = await this.getCollection();
+            const aggregateMethod = [{
+                $lookup: {
+                    from: "plant",
+                    localField: "plantId",
+                    foreignField: "plantId",
+                    as: "fromItems"
+                }
+            },
+            {
+                $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$fromItems", 0] }, "$$ROOT"] } }
+            },
+            { $project: { fromItems: 0 } }]
             return await collection.aggregate(aggregateMethod).toArray();
         } catch (err) {
             console.log(err);
-            return new Error(err);
+            return [];
         }
     }
 }

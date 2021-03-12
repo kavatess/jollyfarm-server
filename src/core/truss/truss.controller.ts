@@ -1,9 +1,10 @@
 import { trussService } from "./truss.service";
 import { Router, Request, Response } from "express";
 import * as express from "express";
-import { newMaxHoleRequestModel, newStatusRequestModel, trussModel } from "./truss.model";
+import { Truss, TrussExtended } from "./truss.model";
 
 export class trussController extends trussService {
+    private trussData: TrussExtended[] = [];
     router: Router = express.Router();
     constructor() {
         super();
@@ -14,43 +15,64 @@ export class trussController extends trussService {
         this.router.post('/truss/update/maxhole', this.updateTrussMaxHoleController());
         this.router.post('/truss/revert/history', this.revertTrussStatusController());
     }
+
+    private async getTrussData(): Promise<TrussExtended[]> {
+        if (!this.trussData.length) {
+            this.trussData = await this.joinWithPlantData();
+        }
+        return this.trussData;
+    }
+
+    private async resetTrussData() {
+        this.trussData = [];
+        await this.getTrussData();
+    }
+
     private getTrussController() {
         return async (_req: Request, res: Response) => {
-            const trussArr = await this.aggregateTrussAndPlant();
+            const trussArr = await this.getTrussData();
             res.send(trussArr);
         }
     }
+
     private updateTrussStatusController() {
         return async (req: Request, res: Response) => {
-            const newStatusTruss: newStatusRequestModel = req.body;
+            const newStatusTruss = req.body;
             const response = await this.updateTrussStatus(newStatusTruss);
+            await this.resetTrussData();
             res.send(response);
         }
     }
+    
     private createNewTrussController() {
         return async (req: Request, res: Response) => {
-            const newTruss: trussModel = req.body;
+            const newTruss: Truss = req.body;
             const response = await this.createNewTruss(newTruss);
+            await this.resetTrussData();
             res.send(response);
         }
     }
+
     private clearTrussController() {
         return async (req: Request, res: Response) => {
-            const truss: trussModel = req.body;
+            const truss: Truss = req.body;
             const response = await this.clearTruss(truss);
+            await this.resetTrussData();
             res.send(response);
         }
     }
+
     private updateTrussMaxHoleController() {
         return async (req: Request, res: Response) => {
-            const newMaxHole: newMaxHoleRequestModel = req.body;
+            const newMaxHole = req.body;
             const response = await this.updateTrussMaxHole(newMaxHole);
+            await this.resetTrussData();
             res.send(response);
         }
     }
     private revertTrussStatusController() {
         return async (req: Request, res: Response) => {
-            const revertStatus: newStatusRequestModel = req.body;
+            const revertStatus = req.body;
             const response = await this.updateTrussStatus(revertStatus);
             res.send(response);
         }
