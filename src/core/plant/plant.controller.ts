@@ -4,7 +4,6 @@ import { Plant, PlantModel } from "./plant.model";
 import { plantService } from "./plant.service";
 
 export class plantController extends plantService {
-    private plantData: Plant[] = [];
     router: Router = express.Router();
 
     constructor() {
@@ -13,18 +12,6 @@ export class plantController extends plantService {
         this.router.post('/plant/update', this.updatePlantController());
         this.router.post('/plant/insert', this.insertPlantController());
         this.router.post('/plant/delete', this.deletePlantController());
-    }
-
-    private async getPlantData(): Promise<Plant[]> {
-        if (!this.plantData.length) {
-            this.plantData = await this.getDataFromCollection();
-        }
-        return this.plantData;
-    }
-
-    private async resetPlantData() {
-        this.plantData = [];
-        await this.getPlantData();
     }
 
     private getPlantDataController() {

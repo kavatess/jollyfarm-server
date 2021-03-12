@@ -1,11 +1,11 @@
 import * as express from "express";
 import { Router, Request, Response } from "express";
-import { Seed, SeedExtended } from "./seed.model";
+import { Seed } from "./seed.model";
 import { seedService } from "./seed.service";
 
 export class seedController extends seedService {
-    private seedData: SeedExtended[] = [];
     router: Router = express.Router();
+
     constructor() {
         super();
         this.router.post('/seed', this.getSeedDataController());
@@ -13,18 +13,6 @@ export class seedController extends seedService {
         this.router.post('/seed/delete', this.deleteSeedController());
         this.router.post('/seed/update/number', this.updateSeedController());
         this.router.post('/seed/remove', this.deleteSeedWhenCreateTruss());
-    }
-
-    private async getSeedData(): Promise<Seed[]> {
-        if (!this.seedData.length) {
-            this.seedData = await this.joinWithPlantData();
-        }
-        return this.seedData;
-    }
-
-    private async resetSeedData() {
-        this.seedData = [];
-        await this.getSeedData();
     }
 
     private getSeedDataController() {

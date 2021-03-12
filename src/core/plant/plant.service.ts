@@ -3,9 +3,24 @@ import { mongoDatabase } from "../../configs/connect.mongodb";
 import { Plant } from "./plant.model";
 
 export class plantService extends mongoDB_Collection {
+    private plantData: Plant[] = [];
+
     protected constructor() {
         super(mongoDatabase.getDB(), "plant")
     }
+
+    protected async getPlantData() {
+        if (!this.plantData.length) {
+            this.plantData = await this.getDataFromCollection();
+        }
+        return this.plantData;
+    }
+
+    protected async resetPlantData() {
+        this.plantData = [];
+        await this.getPlantData();
+    }
+
     protected async updatePlant(updatedObj: Plant): Promise<any> {
         const updateVal = {
             $set: {

@@ -25,7 +25,7 @@ export interface historyTimelineModel {
     historyData: History[];
 }
 
-export class Truss implements History{
+export class Truss implements History {
     _id: string;
     block: string;
     index: number;
@@ -74,6 +74,13 @@ export class Truss implements History{
     }
     get plantGrowthIcon(): string {
         return this.latestPlantGrowth < 3 ? "fas fa-seedling" : "fas fa-tractor";
+    }
+    get plantGrowth(): number {
+        if (!this.plantId) return 0;
+        if (this.statusReal.length > 2) {
+            return this.latestPlantGrowth;
+        }
+        return 0;
     }
 
     createProgressBarStyle(plantColor: string): any {
@@ -161,6 +168,35 @@ export class EmptyTruss extends Truss {
             this.statusPredict[2 + i] = new Status(predictDate, plantNumber, 3);
         }
     }
+}
+
+export interface TrussModelForClientSide extends PlantModel {
+    _id: string;
+    block: string;
+    index: number;
+    maxHole: number;
+    plantId: number;
+    startDate: string;
+    plantNumber: number;
+    plantGrowth: number;
+    plantName: string;
+    imgSrc: string;
+    plantColor: string;
+    growUpTime: number;
+    mediumGrowthTime: number;
+    seedUpTime: number;
+    numberPerKg: number;
+    alivePercent: number;
+    worm: string;
+    wormMonth: string;
+}
+
+export interface EmptyTrussModel {
+    _id: string;
+    block: string;
+    index: number;
+    maxHole: number;
+    plantId: number;
 }
 
 export class Status {
