@@ -1,3 +1,14 @@
+export interface PlantBasicInfo {
+    plantId: number,
+    plantName: string,
+    imgSrc: string,
+    plantColor: string,
+    numberPerKg: number,
+    alivePercent: number,
+    worm: string,
+    wormMonth: string
+}
+
 export interface PlantModel {
     plantId: number,
     plantName: string,

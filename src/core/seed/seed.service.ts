@@ -3,21 +3,21 @@ import { mongoDatabase } from "../../configs/connect.mongodb";
 import { Seed, SeedExtended } from "./seed.model";
 
 export class seedService extends mongoDB_Collection {
-    private seedData: SeedExtended[] = [];
+    private static seedData: SeedExtended[] = [];
 
     protected constructor() {
         super(mongoDatabase.getDB(), "seed-nursery-data")
     }
 
     protected async getSeedData(): Promise<Seed[]> {
-        if (!this.seedData.length) {
-            this.seedData = await this.joinWithPlantData();
+        if (!seedService.seedData.length) {
+            seedService.seedData = await this.joinWithPlantData();
         }
-        return this.seedData;
+        return seedService.seedData;
     }
 
     protected async resetSeedData() {
-        this.seedData = [];
+        seedService.seedData = [];
         await this.getSeedData();
     }
 

@@ -13,9 +13,9 @@ export interface deletedSeedModel {
 
 export class Seed {
     _id: string;
-    plantId!: number;
-    startDate!: string;
-    plantNumber!: number;
+    plantId: number;
+    startDate: string;
+    plantNumber: number;
     constructor(id: string = "", plantId: number = 0, startDate: string = "", plantNumber: number = 0) {
         this._id = id;
         this.plantId = Number(plantId);
@@ -37,30 +37,28 @@ export class Seed {
 }
 
 export class SeedExtended extends Seed implements PlantModel {
-    plantName!: string;
-    imgSrc!: string;
-    plantColor!: string;
-    growUpTime!: number;
-    mediumGrowthTime!: number;
-    seedUpTime!: number;
-    numberPerKg!: number;
-    alivePercent!: number;
-    worm!: string;
-    wormMonth!: string;
+    plantName: string;
+    imgSrc: string;
+    plantColor: string;
+    growUpTime: number;
+    mediumGrowthTime: number;
+    seedUpTime: number;
+    numberPerKg: number;
+    alivePercent: number;
+    worm: string;
+    wormMonth: string;
     constructor(seedAndPlant: any = new Seed()) {
         super(seedAndPlant._id, seedAndPlant.plantId, seedAndPlant.startDate, seedAndPlant.plantNumber);
-        this.setPlantProperties(seedAndPlant);
-    }
-    setPlantProperties(plantType: PlantModel) {
-        this.plantName = plantType.plantName;
-        this.imgSrc = plantType.imgSrc;
-        this.plantColor = plantType.plantColor;
-        this.growUpTime = plantType.growUpTime;
-        this.mediumGrowthTime = plantType.mediumGrowthTime;
-        this.seedUpTime = plantType.seedUpTime;
-        this.alivePercent = plantType.alivePercent;
-        this.worm = plantType.worm;
-        this.wormMonth = plantType.wormMonth;
+        this.plantName = seedAndPlant.plantName;
+        this.imgSrc = seedAndPlant.imgSrc;
+        this.plantColor = seedAndPlant.plantColor;
+        this.growUpTime = seedAndPlant.growUpTime;
+        this.mediumGrowthTime = seedAndPlant.mediumGrowthTime;
+        this.seedUpTime = seedAndPlant.seedUpTime;
+        this.numberPerKg = seedAndPlant.numberPerKg;
+        this.alivePercent = seedAndPlant.alivePercent;
+        this.worm = seedAndPlant.worm;
+        this.wormMonth = seedAndPlant.wormMonth;
     }
     get isReadySeed(): boolean {
         const today = new Date(new Date().toDateString()).getTime();

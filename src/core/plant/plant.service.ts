@@ -3,21 +3,21 @@ import { mongoDatabase } from "../../configs/connect.mongodb";
 import { Plant } from "./plant.model";
 
 export class plantService extends mongoDB_Collection {
-    private plantData: Plant[] = [];
+    private static plantData: Plant[] = [];
 
     protected constructor() {
         super(mongoDatabase.getDB(), "plant")
     }
 
     protected async getPlantData() {
-        if (!this.plantData.length) {
-            this.plantData = await this.getDataFromCollection();
+        if (!plantService.plantData.length) {
+            plantService.plantData = await this.getDocumentWithCond();
         }
-        return this.plantData;
+        return plantService.plantData;
     }
 
     protected async resetPlantData() {
-        this.plantData = [];
+        plantService.plantData = [];
         await this.getPlantData();
     }
 
@@ -36,5 +36,10 @@ export class plantService extends mongoDB_Collection {
             }
         }
         return await this.updateOne(updatedObj._id, updateVal);
+    }
+
+    protected async getPlantInfo(plantId: number) {
+        const findCond = { plantId: plantId };
+        return await this.findOneDocument(findCond);
     }
 }

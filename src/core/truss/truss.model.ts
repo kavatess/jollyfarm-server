@@ -1,5 +1,28 @@
 import { floor } from "mathjs";
-import { Plant, PlantModel } from "../plant/plant.model";
+import { PlantBasicInfo, PlantModel } from "../plant/plant.model";
+
+export class Status {
+    date!: string;
+    plantNumber!: number;
+    plantGrowth!: number;
+    constructor(date: string = "", plantNumber: number = 0, plantGrowth: number = 0) {
+        this.setStatusDate(date);
+        this.setPlantNumber(plantNumber);
+        this.setPlantGrowth(plantGrowth);
+    }
+    setStatusDate(date: string) {
+        this.date = new Date(date).toDateString();
+    }
+    setPlantNumber(plantNumber: number) {
+        this.plantNumber = plantNumber;
+    }
+    setPlantGrowth(plantGrowth: number) {
+        this.plantGrowth = plantGrowth;
+    }
+    calculateStatusPercent(maxHole: number): number {
+        return this.plantNumber / maxHole * 100;
+    }
+}
 
 export class HistoryModel {
     plantId: number;
@@ -15,123 +38,55 @@ export class HistoryModel {
 }
 
 export class History extends HistoryModel {
-    constructor(truss: Truss) {
+    constructor(truss: TrussModel) {
         super(truss.plantId, truss.startDate, truss.statusReal, truss.statusPredict);
     }
 }
 
-export interface historyTimelineModel {
-    dateTime: string;
-    historyData: History[];
-}
-
-export class Truss implements History {
+export interface TrussBasicInfo {
     _id: string;
     block: string;
     index: number;
     maxHole: number;
     plantId: number;
     startDate: string;
+}
+
+export interface TrussModel extends TrussBasicInfo {
     statusReal: Status[];
     statusPredict: Status[];
     history: History[];
-    constructor(_id: string = "", block: string = "", index: number = 0, maxHole: number = 300, plantId: number = 0, startDate: string = "", statusReal: Status[] = [], statusPredict: Status[] = [], history: History[] = []) {
-        this._id = _id;
-        this.block = block;
-        this.index = Number(index);
-        this.maxHole = maxHole;
-        this.plantId = plantId;
-        this.startDate = startDate;
-        this.statusReal = statusReal.map(status => new Status(status.date, status.plantNumber, status.plantGrowth));
-        this.statusPredict = statusPredict.map(status => new Status(status.date, status.plantNumber, status.plantGrowth));
-        this.history = history;
-    }
-    get plantStartDate(): string {
-        return new Date(this.startDate).toLocaleDateString('en-GB');
-    }
-    get latestStatusReal(): Status {
-        const statusReal = this.statusReal;
-        return statusReal.length > 0 ? statusReal[statusReal.length - 1] : new Status();
-    }
-    get latestPlantNumber(): number {
-        return this.latestStatusReal.plantNumber;
-    }
-    get latestPlantGrowth(): number {
-        return this.latestStatusReal.plantGrowth;
-    }
-    get latestPercent(): number {
-        return this.latestPlantNumber / this.maxHole * 100;
-    }
-    get plantGrowthStr(): string {
-        const plantGrowth = this.latestPlantGrowth;
-        if (plantGrowth === 1) {
-            return "Cây con";
-        }
-        if (plantGrowth === 2) {
-            return "Cây trung";
-        }
-        return "Đang thu hoạch";
-    }
-    get plantGrowthIcon(): string {
-        return this.latestPlantGrowth < 3 ? "fas fa-seedling" : "fas fa-tractor";
-    }
-    get plantGrowth(): number {
-        if (!this.plantId) return 0;
-        if (this.statusReal.length > 2) {
-            return this.latestPlantGrowth;
-        }
-        return 0;
-    }
-
-    createProgressBarStyle(plantColor: string): any {
-        const amountPercent = this.latestPercent;
-        let widthColorStyle = {
-            'width': `${amountPercent}%`,
-            "background-color": plantColor
-        }
-        return widthColorStyle;
-    }
-    getPlantNumberByDate(date: Date): number {
-        const statusByDate = this.statusReal.find(status => new Date(status.date).toLocaleDateString() == new Date(date).toLocaleDateString());
-        return statusByDate!.plantNumber;
-    }
-    getPlantGrowthByDate(date: Date): number {
-        const statusByDate = this.statusReal.find(status => new Date(status.date).toLocaleDateString() == new Date(date).toLocaleDateString());
-        return statusByDate!.plantGrowth;
-    }
 }
 
-export class TrussExtended extends Truss implements PlantModel {
-    plantName!: string;
-    imgSrc!: string;
-    plantColor!: string;
-    growUpTime!: number;
-    mediumGrowthTime!: number;
-    seedUpTime!: number;
-    numberPerKg!: number;
-    alivePercent!: number;
-    worm!: string;
-    wormMonth!: string;
-    constructor(trussAndPlant: any = new Truss()) {
-        super(trussAndPlant._id, trussAndPlant.block, trussAndPlant.index, trussAndPlant.maxHole, trussAndPlant.plantId, trussAndPlant.startDate, trussAndPlant.statusReal, trussAndPlant.statusPredict, trussAndPlant.history);
-        this.setPlantProperties(trussAndPlant);
-    }
-    setPlantProperties(plantType: Plant) {
-        this.plantName = plantType.plantName;
-        this.imgSrc = plantType.imgSrc;
-        this.plantColor = plantType.plantColor;
-        this.growUpTime = plantType.growUpTime;
-        this.mediumGrowthTime = plantType.mediumGrowthTime;
-        this.seedUpTime = plantType.seedUpTime;
-        this.alivePercent = plantType.alivePercent;
-        this.worm = plantType.worm;
-        this.wormMonth = plantType.wormMonth;
-    }
+export interface TrussDataStruct extends TrussModel, PlantModel {
 }
 
-export class EmptyTruss extends Truss {
-    constructor(truss: Truss = new Truss()) {
-        super(truss._id, truss.block, truss.index, truss.maxHole, 0, "", [], [], truss.history);
+export interface TrussModelForClientSide extends TrussBasicInfo, PlantBasicInfo {
+    plantNumber: number;
+    plantGrowth: number;
+    predictHarvestDate: number;
+}
+
+export class EmptyTruss {
+    _id: string;
+    protected block: string;
+    protected index: number;
+    protected maxHole: number;
+    plantId: number;
+    protected startDate: string;
+    statusReal: Status[];
+    statusPredict: Status[];
+    history: History[];
+    constructor(emptyTruss: TrussModel) {
+        this._id = emptyTruss._id;
+        this.block = emptyTruss.block;
+        this.index = Number(emptyTruss.index);
+        this.maxHole = emptyTruss.maxHole;
+        this.plantId = emptyTruss.plantId;
+        this.startDate = emptyTruss.startDate;
+        this.statusReal = emptyTruss.statusReal.map(status => new Status(status.date, status.plantNumber, status.plantGrowth));
+        this.statusPredict = emptyTruss.statusPredict.map(status => new Status(status.date, status.plantNumber, status.plantGrowth));
+        this.history = emptyTruss.history;
     }
 
     createStatusReal(plantNumber: number): void {
@@ -144,7 +99,6 @@ export class EmptyTruss extends Truss {
         this.predictFinalGrowthStatus(growUpTime);
         this.predictAfterHarvestStatus();
     }
-
     private predictMediumGrowthStatus(mediumGrowthTime: number): void {
         const firstStatus = this.statusReal[0];
         const predictDate = this.calculateEndDate(firstStatus.date, mediumGrowthTime);
@@ -168,75 +122,125 @@ export class EmptyTruss extends Truss {
             this.statusPredict[2 + i] = new Status(predictDate, plantNumber, 3);
         }
     }
+    get clientTrussData(): TrussBasicInfo {
+        return {
+            _id: this._id,
+            block: this.block,
+            index: this.index,
+            maxHole: this.maxHole,
+            plantId: this.plantId,
+            startDate: this.startDate,
+        }
+    }
 }
 
-export interface TrussModelForClientSide extends PlantModel {
+export class Truss extends EmptyTruss {
+    private plantName!: string;
+    private imgSrc!: string;
+    private plantColor!: string;
+    private growUpTime!: number;
+    private mediumGrowthTime!: number;
+    private seedUpTime!: number;
+    private numberPerKg!: number;
+    private alivePercent!: number;
+    private worm!: string;
+    private wormMonth!: string;
+    constructor(trussAndPlant: TrussDataStruct) {
+        super(trussAndPlant);
+        if (this.plantId) {
+            this.plantName = trussAndPlant.plantName;
+            this.imgSrc = trussAndPlant.imgSrc;
+            this.plantColor = trussAndPlant.plantColor;
+            this.growUpTime = trussAndPlant.growUpTime;
+            this.mediumGrowthTime = trussAndPlant.mediumGrowthTime;
+            this.seedUpTime = trussAndPlant.seedUpTime;
+            this.numberPerKg = trussAndPlant.numberPerKg;
+            this.alivePercent = trussAndPlant.alivePercent;
+            this.worm = trussAndPlant.worm;
+            this.wormMonth = trussAndPlant.wormMonth;
+        }
+    }
+    get latestPlantNumber(): number {
+        return this.latestStatusReal.plantNumber;
+    }
+    get latestPlantGrowth(): number {
+        return this.latestStatusReal.plantGrowth;
+    }
+    get realPlantGrowth(): number {
+        if (!this.plantId) return 0;
+        if (this.statusReal.length > 2) return this.latestPlantGrowth;
+        const growUpCond = this.statusReal.length == 2 && this.latestPlantGrowth == 2 && new Date() >= new Date(this.statusPredict[2].date);
+        if (growUpCond) return this.statusPredict[2].plantGrowth;
+        const mediumGrowthCond = this.statusReal.length == 1 && this.latestPlantGrowth == 1 && new Date() >= new Date(this.statusPredict[1].date);
+        if (mediumGrowthCond) return this.statusPredict[1].plantGrowth;
+        return this.latestPlantGrowth;
+    }
+
+    private get latestStatusReal(): Status {
+        const statusReal = this.statusReal;
+        return statusReal.length > 0 ? statusReal[statusReal.length - 1] : new Status();
+    }
+    private get latestPercent(): number {
+        return this.latestPlantNumber / this.maxHole * 100;
+    }
+    private get harvestDate(): number {
+        const today = new Date().getTime();
+        const harvestStatus = this.statusReal.find(status => status.plantGrowth == 3);
+        if (harvestStatus) {
+            const harvestDate = new Date(harvestStatus.date).getTime();
+            return floor((today - harvestDate) / 86400000);
+        }
+        const startDate = new Date(this.startDate).getTime();
+        return floor(this.growUpTime - (today - startDate) / 86400000);
+    }
+    private getplantNumberByDate(date: Date): number {
+        const statusByDate = this.statusReal.find(status => new Date(status.date).toLocaleDateString() == new Date(date).toLocaleDateString());
+        return statusByDate!.plantNumber;
+    }
+    private getPlantGrowthByDate(date: Date): number {
+        const statusByDate = this.statusReal.find(status => new Date(status.date).toLocaleDateString() == new Date(date).toLocaleDateString());
+        return statusByDate!.plantGrowth;
+    }
+    get clientTrussData(): TrussModelForClientSide {
+        return {
+            _id: this._id,
+            block: this.block,
+            index: this.index,
+            maxHole: this.maxHole,
+            plantId: this.plantId,
+            startDate: this.startDate,
+            plantNumber: this.latestPlantNumber,
+            plantGrowth: this.realPlantGrowth,
+            predictHarvestDate: this.harvestDate,
+            plantName: this.plantName,
+            imgSrc: this.imgSrc,
+            plantColor: this.plantColor,
+            numberPerKg: this.numberPerKg,
+            alivePercent: this.alivePercent,
+            worm: this.worm,
+            wormMonth: this.wormMonth
+        }
+    }
+}
+
+
+
+export class newStatusRequest {
     _id: string;
-    block: string;
-    index: number;
-    maxHole: number;
+    date: string;
+    plantNumber: number;
+    plantGrowth: number;
+    constructor(id: string, date: string, plantNumber: number, plantGrowth: number) {
+        this._id = id;
+        this.date = date;
+        this.plantNumber = plantNumber;
+        this.plantGrowth = plantGrowth;
+    }
+}
+
+export interface createTrussRequest {
+    _id: string;
     plantId: number;
     startDate: string;
     plantNumber: number;
-    plantGrowth: number;
-    plantName: string;
-    imgSrc: string;
-    plantColor: string;
-    growUpTime: number;
-    mediumGrowthTime: number;
-    seedUpTime: number;
-    numberPerKg: number;
-    alivePercent: number;
-    worm: string;
-    wormMonth: string;
-}
-
-export interface EmptyTrussModel {
-    _id: string;
-    block: string;
-    index: number;
-    maxHole: number;
-    plantId: number;
-}
-
-export class Status {
-    date!: string;
-    plantNumber!: number;
-    plantGrowth!: number;
-    constructor(date: string = "", plantNumber: number = 0, plantGrowth: number = 0) {
-        this.setStatusDate(date);
-        this.setPlantNumber(plantNumber);
-        this.setPlantGrowth(plantGrowth);
-    }
-    setStatusDate(date: string) {
-        this.date = new Date(date).toLocaleDateString('es-PA');
-    }
-    setPlantNumber(plantNumber: number) {
-        this.plantNumber = plantNumber;
-    }
-    setPlantGrowth(plantGrowth: number) {
-        this.plantGrowth = plantGrowth;
-    }
-
-    getPlantGrowthIcon(): string {
-        return this.plantGrowth < 3 ? "fas fa-seedling" : "fas fa-tractor";
-    }
-    getPlantStatusIcon(): string {
-        return this.plantNumber > 0 ? this.getPlantGrowthIcon() : 'fas fa-check';
-    }
-    getPlantGrowthStr(): string {
-        if (this.plantNumber == 0) {
-            return "Đã thu hết rau";
-        }
-        if (this.plantGrowth == 1) {
-            return "Cây con";
-        }
-        if (this.plantGrowth == 2) {
-            return "Cây trung";
-        }
-        return "Đang thu hoạch";
-    }
-    calculateStatusPercent(maxHole: number): number {
-        return this.plantNumber / maxHole * 100;
-    }
 }

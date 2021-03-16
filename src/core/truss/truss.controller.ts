@@ -1,7 +1,7 @@
 import { trussService } from "./truss.service";
 import { Router, Request, Response } from "express";
 import * as express from "express";
-import { Truss } from "./truss.model";
+import { createTrussRequest, newStatusRequest, TrussModel } from "./truss.model";
 
 export class trussController extends trussService {
     router: Router = express.Router();
@@ -18,34 +18,31 @@ export class trussController extends trussService {
 
     private getTrussController() {
         return async (_req: Request, res: Response) => {
-            const trussArr = await this.getTrussData();
+            const trussArr = await this.getTrussDataForClient();
             res.send(trussArr);
         }
     }
 
     private updateTrussStatusController() {
         return async (req: Request, res: Response) => {
-            const newStatusTruss = req.body;
+            const newStatusTruss: newStatusRequest = req.body;
             const response = await this.updateTrussStatus(newStatusTruss);
-            await this.resetTrussData();
             res.send(response);
         }
     }
 
     private createNewTrussController() {
         return async (req: Request, res: Response) => {
-            const newTruss: Truss = req.body;
+            const newTruss: createTrussRequest = req.body;
             const response = await this.createNewTruss(newTruss);
-            await this.resetTrussData();
             res.send(response);
         }
     }
 
     private clearTrussController() {
         return async (req: Request, res: Response) => {
-            const truss: Truss = req.body;
+            const truss = req.body;
             const response = await this.clearTruss(truss);
-            await this.resetTrussData();
             res.send(response);
         }
     }
@@ -54,10 +51,10 @@ export class trussController extends trussService {
         return async (req: Request, res: Response) => {
             const newMaxHole = req.body;
             const response = await this.updateTrussMaxHole(newMaxHole);
-            await this.resetTrussData();
             res.send(response);
         }
     }
+
     private revertTrussStatusController() {
         return async (req: Request, res: Response) => {
             const revertStatus = req.body;

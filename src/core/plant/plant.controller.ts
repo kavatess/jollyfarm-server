@@ -47,4 +47,8 @@ export class plantController extends plantService {
             res.send(response);
         }
     }
+
+    public async getPlantType(plantId: number) {
+        return this.getPlantInfo(plantId);
+    }
 }

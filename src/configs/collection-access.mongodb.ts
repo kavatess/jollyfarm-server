@@ -12,13 +12,27 @@ export class mongoDB_Collection {
             const db = await this.database;
             this.collection = db.collection(this.colName);
         }
-        return this.collection;
     }
 
-    protected async getDataFromCollection(findCond = {}): Promise<any[]> {
+    protected async findOneDocument(findCond: any) {
         try {
-            const collection = await this.getCollection();
-            return await collection.find(findCond).toArray();
+            await this.getCollection();
+            return await this.collection.findOne(findCond);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    protected async getDocumentById(id: string) {
+        await this.getCollection();
+        const findCond = { _id: new ObjectId(id) };
+        return await this.findOneDocument(findCond);
+    }
+
+    protected async getDocumentWithCond(findCond = {}): Promise<any[]> {
+        try {
+            await this.getCollection();
+            return await this.collection.find(findCond).toArray();
         } catch (err) {
             console.log(err);
             return [];
@@ -27,8 +41,8 @@ export class mongoDB_Collection {
 
     protected async insertOne(obj: any) {
         try {
-            const collection = await this.getCollection();
-            return await collection.insertOne(obj);
+            await this.getCollection();
+            return await this.collection.insertOne(obj);
         } catch (err) {
             console.log(err);
         }
@@ -36,8 +50,8 @@ export class mongoDB_Collection {
 
     protected async insertMany(objArr: any[]) {
         try {
-            const collection = await this.getCollection();
-            return await collection.insertMany(objArr);
+            await this.getCollection();
+            return await this.collection.insertMany(objArr);
         } catch (err) {
             console.log(err);
         }
@@ -45,9 +59,9 @@ export class mongoDB_Collection {
 
     protected async deleteOne(deletedObjId: string) {
         try {
-            const collection = await this.getCollection();
+            await this.getCollection();
             const deleteCond = { _id: new ObjectId(deletedObjId) };
-            return await collection.deleteOne(deleteCond);
+            return await this.collection.deleteOne(deleteCond);
         } catch (err) {
             console.log(err);
         }
@@ -55,10 +69,10 @@ export class mongoDB_Collection {
 
     protected async deleteMany(deletedObjIdArr: string[]) {
         try {
-            const collection = await this.getCollection();
+            await this.getCollection();
             const deletedIdArr = deletedObjIdArr.map(id => new ObjectId(id));
             const deleteCond = { _id: { $in: deletedIdArr } };
-            return await collection.deleteMany(deleteCond);
+            return await this.collection.deleteMany(deleteCond);
         } catch (err) {
             console.log(err);
         }
@@ -66,9 +80,9 @@ export class mongoDB_Collection {
 
     protected async updateOne(updatedObjId: string, updateVal: any) {
         try {
-            const collection = await this.getCollection();
+            await this.getCollection();
             const findCond = { _id: new ObjectId(updatedObjId) };
-            return await collection.updateOne(findCond, updateVal);
+            return await this.collection.updateOne(findCond, updateVal);
         } catch (err) {
             console.log(err);
         }
@@ -76,7 +90,7 @@ export class mongoDB_Collection {
 
     protected async joinWithPlantData(): Promise<any[]> {
         try {
-            const collection = await this.getCollection();
+            await this.getCollection();
             const aggregateMethod = [{
                 $lookup: {
                     from: "plant",
@@ -89,7 +103,7 @@ export class mongoDB_Collection {
                 $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$fromItems", 0] }, "$$ROOT"] } }
             },
             { $project: { fromItems: 0 } }]
-            return await collection.aggregate(aggregateMethod).toArray();
+            return await this.collection.aggregate(aggregateMethod).toArray();
         } catch (err) {
             console.log(err);
             return [];
