@@ -1,12 +1,11 @@
 import { mongoDB_Collection } from "../../configs/collection-access.mongodb";
-import { mongoDatabase } from "../../configs/connect.mongodb";
 import { Seed, SeedExtended } from "./seed.model";
 
 export class seedService extends mongoDB_Collection {
     private static seedData: SeedExtended[] = [];
 
     protected constructor() {
-        super(mongoDatabase.getDB(), "seed-nursery-data")
+        super("farm-database", "seed-nursery-data")
     }
 
     protected async getSeedData(): Promise<Seed[]> {

@@ -1,15 +1,28 @@
 import { mongoDB_Collection } from "../../configs/collection-access.mongodb";
-import { mongoDatabase } from "../../configs/connect.mongodb";
-import { plantController } from "../plant/plant.controller";
 import { Plant } from "../plant/plant.model";
-import { createTrussRequest, EmptyTruss, History, HistoryModel, newStatusRequest, Status, Truss, TrussBasicInfo, TrussDataStruct, TrussModel, TrussModelForClientSide } from "./truss.model";
+import { createTrussRequest, EmptyTruss, newStatusRequest, Status, Truss, TrussBasicInfo, TrussDataStruct, TrussModel, TrussModelForClientSide } from "./truss.model";
+import plantController from "../plant/plant.controller";
 
 export class trussService extends mongoDB_Collection {
     private trussExtendedData: EmptyTruss[] = [];
     private processedTrussData: (TrussModelForClientSide | TrussBasicInfo)[] = [];
 
     protected constructor() {
-        super(mongoDatabase.getDB(), "truss-data")
+        super("farm-database", "truss")
+    }
+
+    private async autoUpdateTrussStatus(trussEl: Truss) {
+        if (trussEl.realPlantGrowth > trussEl.latestPlantGrowth) {
+            const today = new Date().toString();
+            const updateReq = new newStatusRequest(trussEl._id, today, trussEl.latestPlantNumber, trussEl.realPlantGrowth)
+            return await this.updateTrussStatus(updateReq);
+        }
+    }
+    private async resetTrussData() {
+        this.trussExtendedData = [];
+        await this.getTrussData();
+        this.processedTrussData = [];
+        await this.getTrussDataForClient();
     }
 
     protected async getTrussData() {
@@ -21,16 +34,10 @@ export class trussService extends mongoDB_Collection {
                     this.autoUpdateTrussStatus(trussEl);
                     return trussEl;
                 }
-                return new EmptyTruss(truss);;
+                return new EmptyTruss(truss);
             });
         }
-    }
-
-    private async resetTrussData() {
-        this.trussExtendedData = [];
-        await this.getTrussData();
-        this.processedTrussData = [];
-        await this.getTrussDataForClient();
+        return this.trussExtendedData;
     }
 
     protected async getTrussDataForClient() {
@@ -41,14 +48,6 @@ export class trussService extends mongoDB_Collection {
             })
         }
         return this.processedTrussData;
-    }
-
-    private async autoUpdateTrussStatus(trussEl: Truss) {
-        if (trussEl.realPlantGrowth > trussEl.latestPlantGrowth) {
-            const today = new Date().toLocaleDateString('es-PA');
-            const updateReq = new newStatusRequest(trussEl._id, today, trussEl.latestPlantNumber, trussEl.realPlantGrowth)
-            return await this.updateTrussStatus(updateReq);
-        }
     }
 
     protected async updateTrussStatus(newStatusRequest: newStatusRequest) {
@@ -62,27 +61,28 @@ export class trussService extends mongoDB_Collection {
     }
 
     protected async clearTruss(clearedTrussId: string) {
-        const clearedTruss: TrussModel = await this.getDocumentById(clearedTrussId);
-        const newHistory: History = new HistoryModel(clearedTruss.plantId, clearedTruss.startDate, clearedTruss.statusReal, clearedTruss.statusPredict);
-        const history = clearedTruss.history.push(newHistory);
-        const updateVal = {
-            $set: {
-                plantId: 0,
-                startDate: '',
-                statusReal: [],
-                statusPredict: [],
-                history: history
+        const clearedTruss = this.trussExtendedData.find(truss => truss._id == clearedTrussId);
+        if (clearedTruss?.plantId) {
+            clearedTruss?.clearTruss();
+            const updateVal = {
+                $set: {
+                    plantId: 0,
+                    startDate: "",
+                    statusReal: [],
+                    statusPredict: [],
+                    history: clearedTruss.history
+                }
             }
+            await this.updateOne(clearedTrussId, updateVal);
+            return await this.resetTrussData();
         }
-        await this.updateOne(clearedTrussId, updateVal);
-        return await this.resetTrussData();
     }
 
     protected async createNewTruss(newTrussReq: createTrussRequest) {
         const emptyTruss = this.trussExtendedData.find(truss => truss._id == newTrussReq._id);
         if (!(emptyTruss?.plantId)) {
             emptyTruss?.createStatusReal(newTrussReq.plantNumber);
-            const plantType: Plant = await new plantController().getPlantType(newTrussReq.plantId);
+            const plantType: Plant = await plantController.getPlantType(newTrussReq.plantId);
             emptyTruss?.createStatusPredict(plantType.mediumGrowthTime, plantType.growUpTime);
             const updateVal = {
                 $set: {
@@ -101,5 +101,45 @@ export class trussService extends mongoDB_Collection {
         const updateVal = { $set: { maxHole: newMaxHole.maxHole } };
         await this.updateOne(newMaxHole._id, updateVal);
         return await this.resetTrussData();
+    }
+
+    protected async getOlderHistory() {
+        try {
+            const collection = await this.getCollection();
+            const aggregateMethod = [
+                {
+                    $unwind: "$history"
+                },
+                {
+                    $lookup: {
+                        from: 'plant',
+                        localField: 'history.plantId',
+                        foreignField: 'plantId',
+                        as: 'plantType'
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$_id",
+                        root: { $mergeObjects: "$$ROOT" },
+                        history: { $push: { $mergeObjects: [{ $arrayElemAt: ["$plantType", 0] }, "$history"] } }
+                    }
+                },
+                {
+                    $replaceRoot: {
+                        newRoot: {
+                            $mergeObjects: ['$root', '$$ROOT']
+                        }
+                    }
+                },
+                {
+                    $project: { root: 0, plantType: 0, plantInfo: 0 }
+                }
+            ]
+            return await collection.aggregate(aggregateMethod).toArray();
+        } catch (err) {
+            console.log(err);
+            return [];
+        }
     }
 }

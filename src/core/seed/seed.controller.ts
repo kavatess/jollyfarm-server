@@ -3,7 +3,7 @@ import { Router, Request, Response } from "express";
 import { Seed } from "./seed.model";
 import { seedService } from "./seed.service";
 
-export class seedController extends seedService {
+class SeedController extends seedService {
     router: Router = express.Router();
 
     constructor() {
@@ -34,7 +34,7 @@ export class seedController extends seedService {
     private deleteSeedController() {
         return async (req: Request, res: Response) => {
             const seedIdArr: string[] = req.body.idArr;
-            const response = await this.deleteMany(seedIdArr);
+            const response = await this.deleteManyByIdArr(seedIdArr);
             await this.resetSeedData();
             res.send(response);
         }
@@ -52,9 +52,11 @@ export class seedController extends seedService {
     private deleteSeedWhenCreateTruss() {
         return async (req: Request, res: Response) => {
             const deletedSeedId: string = req.body.createdSeedId;
-            const response = await this.deleteOne(deletedSeedId);
+            const response = await this.deleteOneById(deletedSeedId);
             await this.resetSeedData();
             res.send(response);
         }
     }
 }
+
+export default new SeedController();

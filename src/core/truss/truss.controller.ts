@@ -3,7 +3,7 @@ import { Router, Request, Response } from "express";
 import * as express from "express";
 import { createTrussRequest, newStatusRequest, TrussModel } from "./truss.model";
 
-export class trussController extends trussService {
+class TrussController extends trussService {
     router: Router = express.Router();
 
     constructor() {
@@ -14,6 +14,7 @@ export class trussController extends trussService {
         this.router.post('/truss/clear', this.clearTrussController());
         this.router.post('/truss/update/maxhole', this.updateTrussMaxHoleController());
         this.router.post('/truss/revert/history', this.revertTrussStatusController());
+        this.router.post('/truss/history', this.getHistory());
     }
 
     private getTrussController() {
@@ -62,4 +63,13 @@ export class trussController extends trussService {
             res.send(response);
         }
     }
+
+    private getHistory() {
+        return async (_req: Request, res: Response) => {
+            const response = await this.getTrussData();
+            res.send(response);
+        }
+    }
 }
+
+export default new TrussController();

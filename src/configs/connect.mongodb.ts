@@ -1,33 +1,29 @@
-import mongodb, { Db } from "mongodb";
+import mongodb, { Db, MongoClient } from "mongodb";
 
 export class mongoDatabase {
     private static url: string = "mongodb+srv://kavatess:2306@cluster0.gfleb.mongodb.net/test?retryWrites=true&w=majority";
-    private static db: Db;
-    private static storageDB: Db;
-    private constructor() { }
-    private static async connect(dbName: string) {
+    private static mongodb: MongoClient;
+    private constructor() {
+    }
+    
+    private static async connect() {
         try {
-            const database = await mongodb.connect(mongoDatabase.url, { useNewUrlParser: true, useUnifiedTopology: true });
-            return database.db(dbName);
+            return await mongodb.connect(mongoDatabase.url, { useNewUrlParser: true, useUnifiedTopology: true });
         } catch (err) {
             console.log(err);
             process.exit();
         }
     }
-    public static async getDB() {
-        if (!mongoDatabase.db) {
+    private static async dbConnection() {
+        if (!mongoDatabase.mongodb) {
             console.log(`Establishing database connection...`);
-            mongoDatabase.db = await mongoDatabase.connect("farm-database");
+            mongoDatabase.mongodb = await this.connect();
             console.log(`Database connection established successfully.`);
         }
-        return mongoDatabase.db;
+        return mongoDatabase.mongodb;
     }
-    public static async getStorageDB() {
-        if (!mongoDatabase.storageDB) {
-            console.log(`Establishing storage database connection...`);
-            mongoDatabase.storageDB = await this.connect("data-storage");
-            console.log(`Storage database connection established successfully.`);
-        }
-        return mongoDatabase.storageDB;
+    public static async getDatabase(dbName: string): Promise<Db> {
+        const mongoDB = await this.dbConnection();
+        return mongoDB.db(dbName);
     }
 }

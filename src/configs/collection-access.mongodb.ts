@@ -1,17 +1,19 @@
 import { Collection, Db, ObjectId } from "mongodb";
+import { mongoDatabase } from "./connect.mongodb";
 
 export class mongoDB_Collection {
     private collection!: Collection;
 
-    protected constructor(private database: Promise<Db>, private colName: string) {
+    protected constructor(private dbName: string, private colName: string) {
         this.getCollection();
     }
 
     protected async getCollection() {
         if (!this.collection) {
-            const db = await this.database;
+            const db: Db = await mongoDatabase.getDatabase(this.dbName);
             this.collection = db.collection(this.colName);
         }
+        return this.collection;
     }
 
     protected async findOneDocument(findCond: any) {
@@ -57,7 +59,7 @@ export class mongoDB_Collection {
         }
     }
 
-    protected async deleteOne(deletedObjId: string) {
+    protected async deleteOneById(deletedObjId: string) {
         try {
             await this.getCollection();
             const deleteCond = { _id: new ObjectId(deletedObjId) };
@@ -67,7 +69,7 @@ export class mongoDB_Collection {
         }
     }
 
-    protected async deleteMany(deletedObjIdArr: string[]) {
+    protected async deleteManyByIdArr(deletedObjIdArr: string[]) {
         try {
             await this.getCollection();
             const deletedIdArr = deletedObjIdArr.map(id => new ObjectId(id));

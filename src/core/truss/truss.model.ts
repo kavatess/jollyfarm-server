@@ -1,45 +1,60 @@
 import { floor } from "mathjs";
-import { PlantBasicInfo, PlantModel } from "../plant/plant.model";
+import { PlantModel } from "../plant/plant.model";
 
 export class Status {
     date!: string;
     plantNumber!: number;
     plantGrowth!: number;
     constructor(date: string = "", plantNumber: number = 0, plantGrowth: number = 0) {
-        this.setStatusDate(date);
-        this.setPlantNumber(plantNumber);
-        this.setPlantGrowth(plantGrowth);
-    }
-    setStatusDate(date: string) {
-        this.date = new Date(date).toDateString();
-    }
-    setPlantNumber(plantNumber: number) {
-        this.plantNumber = plantNumber;
-    }
-    setPlantGrowth(plantGrowth: number) {
-        this.plantGrowth = plantGrowth;
+        const dateStr = new Date(date).toString();
+        this.date = (dateStr === "Invalid Date") ? "" : dateStr;
+        this.plantNumber = Number(plantNumber);
+        this.plantGrowth = Number(plantGrowth);
     }
     calculateStatusPercent(maxHole: number): number {
         return this.plantNumber / maxHole * 100;
     }
 }
 
-export class HistoryModel {
-    plantId: number;
+export class HistoryModel implements PlantModel {
     startDate: string;
     statusReal: Status[];
     statusPredict: Status[];
-    constructor(plantId: number = 0, ngayTrong: string = "", statusReal: Status[] = [], statusPredict: Status[] = []) {
-        this.plantId = plantId;
-        this.startDate = ngayTrong;
-        this.statusReal = statusReal;
-        this.statusPredict = statusPredict;
+    plantId: number;
+    plantName!: string;
+    imgSrc!: string;
+    plantColor!: string;
+    growUpTime!: number;
+    mediumGrowthTime!: number;
+    seedUpTime!: number;
+    numberPerKg!: number;
+    alivePercent!: number;
+    worm!: string;
+    wormMonth!: string;
+    constructor(plantId: number, startDate: string, statusReal: Status[], statusPredict: Status[], plantName: string = "", imgSrc: string = "", plantColor: string = "", growUpTime: number = 0, mediumGrowthTime: number = 0, seedUpTime: number = 0, numberPerKg: number = 0, alivePercent: number = 0, worm: string = "", wormMonth: string = "") {
+        this.plantId = Number(plantId);
+        const dateStr = new Date(startDate).toString();
+        this.startDate = (dateStr === "Invalid Date") ? "" : dateStr;
+        this.statusReal = statusReal.map(status => new Status(status.date, status.plantNumber, status.plantGrowth));
+        this.statusPredict = statusPredict.map(status => new Status(status.date, status.plantNumber, status.plantGrowth));
+        if (plantName) {
+            this.plantName = plantName;
+            this.imgSrc = imgSrc;
+            this.plantColor = plantColor;
+            this.growUpTime = Number(growUpTime);
+            this.mediumGrowthTime = Number(mediumGrowthTime);
+            this.seedUpTime = Number(seedUpTime);
+            this.numberPerKg = Number(numberPerKg);
+            this.alivePercent = Number(alivePercent);
+            this.worm = worm;
+            this.wormMonth = wormMonth;
+        }
     }
 }
 
 export class History extends HistoryModel {
-    constructor(truss: TrussModel) {
-        super(truss.plantId, truss.startDate, truss.statusReal, truss.statusPredict);
+    constructor(historyEl: History) {
+        super(historyEl.plantId, historyEl.startDate, historyEl.statusReal, historyEl.statusPredict, historyEl.plantName, historyEl.imgSrc, historyEl.plantColor, historyEl.growUpTime, historyEl.mediumGrowthTime, historyEl.seedUpTime, historyEl.numberPerKg, historyEl.alivePercent, historyEl.worm, historyEl.wormMonth);
     }
 }
 
@@ -61,34 +76,37 @@ export interface TrussModel extends TrussBasicInfo {
 export interface TrussDataStruct extends TrussModel, PlantModel {
 }
 
-export interface TrussModelForClientSide extends TrussBasicInfo, PlantBasicInfo {
+export interface TrussModelForClientSide extends TrussBasicInfo, PlantModel {
     plantNumber: number;
     plantGrowth: number;
     predictHarvestDate: number;
 }
 
-export class EmptyTruss {
+export class EmptyTruss extends History implements TrussBasicInfo {
     _id: string;
-    protected block: string;
-    protected index: number;
-    protected maxHole: number;
-    plantId: number;
-    protected startDate: string;
-    statusReal: Status[];
-    statusPredict: Status[];
+    block: string;
+    index: number;
+    maxHole: number;
     history: History[];
-    constructor(emptyTruss: TrussModel) {
+    constructor(emptyTruss: TrussDataStruct) {
+        super(emptyTruss);
         this._id = emptyTruss._id;
         this.block = emptyTruss.block;
-        this.index = Number(emptyTruss.index);
+        this.index = emptyTruss.index;
         this.maxHole = emptyTruss.maxHole;
-        this.plantId = emptyTruss.plantId;
-        this.startDate = emptyTruss.startDate;
-        this.statusReal = emptyTruss.statusReal.map(status => new Status(status.date, status.plantNumber, status.plantGrowth));
-        this.statusPredict = emptyTruss.statusPredict.map(status => new Status(status.date, status.plantNumber, status.plantGrowth));
-        this.history = emptyTruss.history;
+        this.history = emptyTruss.history.map(his => new History(his));
     }
 
+    clearTruss(): void {
+        if (this.plantId) {
+            const newHistory: History = new HistoryModel(this.plantId, this.startDate, this.statusReal, this.statusPredict);
+            this.history.push(newHistory);
+            this.plantId = 0;
+            this.startDate = "";
+            this.statusReal = [];
+            this.statusPredict = [];
+        }
+    }
     createStatusReal(plantNumber: number): void {
         const firstStatus = new Status(this.startDate, Number(plantNumber), 1);
         this.statusReal = [firstStatus];
@@ -132,33 +150,18 @@ export class EmptyTruss {
             startDate: this.startDate,
         }
     }
+    // get recentHistory(): HistoryElement {
+    //     const
+    //     return {
+    //         plantId: this.plantId,
+    //         maxHole: this.
+    //     }
+    // }
 }
 
 export class Truss extends EmptyTruss {
-    private plantName!: string;
-    private imgSrc!: string;
-    private plantColor!: string;
-    private growUpTime!: number;
-    private mediumGrowthTime!: number;
-    private seedUpTime!: number;
-    private numberPerKg!: number;
-    private alivePercent!: number;
-    private worm!: string;
-    private wormMonth!: string;
     constructor(trussAndPlant: TrussDataStruct) {
         super(trussAndPlant);
-        if (this.plantId) {
-            this.plantName = trussAndPlant.plantName;
-            this.imgSrc = trussAndPlant.imgSrc;
-            this.plantColor = trussAndPlant.plantColor;
-            this.growUpTime = trussAndPlant.growUpTime;
-            this.mediumGrowthTime = trussAndPlant.mediumGrowthTime;
-            this.seedUpTime = trussAndPlant.seedUpTime;
-            this.numberPerKg = trussAndPlant.numberPerKg;
-            this.alivePercent = trussAndPlant.alivePercent;
-            this.worm = trussAndPlant.worm;
-            this.wormMonth = trussAndPlant.wormMonth;
-        }
     }
     get latestPlantNumber(): number {
         return this.latestStatusReal.plantNumber;
@@ -215,6 +218,9 @@ export class Truss extends EmptyTruss {
             plantName: this.plantName,
             imgSrc: this.imgSrc,
             plantColor: this.plantColor,
+            growUpTime: this.growUpTime,
+            mediumGrowthTime: this.mediumGrowthTime,
+            seedUpTime: this.seedUpTime,
             numberPerKg: this.numberPerKg,
             alivePercent: this.alivePercent,
             worm: this.worm,
@@ -223,8 +229,6 @@ export class Truss extends EmptyTruss {
     }
 }
 
-
-
 export class newStatusRequest {
     _id: string;
     date: string;
@@ -232,7 +236,8 @@ export class newStatusRequest {
     plantGrowth: number;
     constructor(id: string, date: string, plantNumber: number, plantGrowth: number) {
         this._id = id;
-        this.date = date;
+        const dateStr = new Date(date).toString();
+        this.date = (dateStr === "Invalid Date") ? "" : dateStr;
         this.plantNumber = plantNumber;
         this.plantGrowth = plantGrowth;
     }

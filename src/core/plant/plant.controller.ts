@@ -3,7 +3,7 @@ import { Router, Request, Response } from "express";
 import { Plant, PlantModel } from "./plant.model";
 import { plantService } from "./plant.service";
 
-export class plantController extends plantService {
+class plantController extends plantService {
     router: Router = express.Router();
 
     constructor() {
@@ -42,7 +42,7 @@ export class plantController extends plantService {
     private deletePlantController() {
         return async (req: Request, res: Response) => {
             const plantObjId: string = req.body;
-            const response = await this.deleteOne(plantObjId);
+            const response = await this.deleteOneById(plantObjId);
             await this.resetPlantData();
             res.send(response);
         }
@@ -52,3 +52,5 @@ export class plantController extends plantService {
         return this.getPlantInfo(plantId);
     }
 }
+
+export default new plantController();

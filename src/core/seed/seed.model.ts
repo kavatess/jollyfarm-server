@@ -19,7 +19,8 @@ export class Seed {
     constructor(id: string = "", plantId: number = 0, startDate: string = "", plantNumber: number = 0) {
         this._id = id;
         this.plantId = Number(plantId);
-        this.startDate = new Date(startDate).toLocaleDateString('es-PA');
+        const dateStr = new Date(startDate).toString();
+        this.startDate = (dateStr === "Invalid Date") ? "" : dateStr;
         this.plantNumber = Number(plantNumber);
     }
     get age(): number {
@@ -61,7 +62,7 @@ export class SeedExtended extends Seed implements PlantModel {
         this.wormMonth = seedAndPlant.wormMonth;
     }
     get isReadySeed(): boolean {
-        const today = new Date(new Date().toDateString()).getTime();
+        const today = new Date(new Date().toString()).getTime();
         const startDate = new Date(this.startDate || today).getTime();
         return (today - startDate) > 86400000 * this.seedUpTime;
     }

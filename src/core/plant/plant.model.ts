@@ -1,26 +1,15 @@
-export interface PlantBasicInfo {
-    plantId: number,
-    plantName: string,
-    imgSrc: string,
-    plantColor: string,
-    numberPerKg: number,
-    alivePercent: number,
-    worm: string,
-    wormMonth: string
-}
-
 export interface PlantModel {
-    plantId: number,
-    plantName: string,
-    imgSrc: string,
-    plantColor: string,
-    growUpTime: number,
-    mediumGrowthTime: number,
-    seedUpTime: number,
-    numberPerKg: number,
-    alivePercent: number,
-    worm: string,
-    wormMonth: string
+    plantId: number;
+    plantName: string;
+    imgSrc: string;
+    plantColor: string;
+    growUpTime: number;
+    mediumGrowthTime: number;
+    seedUpTime: number;
+    numberPerKg: number;
+    alivePercent: number;
+    worm: string;
+    wormMonth: string;
 }
 
 export interface PlantBuilder {
@@ -49,8 +38,8 @@ export class Plant implements PlantModel, PlantBuilder {
     alivePercent: number;
     worm: string;
     wormMonth: string;
-    constructor(id: string = "", plantId: number = 0, plantName: string = "", imgSrc: string = "", plantColor: string = "", growUpTime: number = 0, mediumGrowthTime: number = 0, seedUpTime: number = 0, numberPerKg: number = 0, alivePercent: number = 0, worm: string = "", wormMonth: string = "") {
-        this._id = id;
+    constructor(_id: string, plantId: number = 0, plantName: string = "", imgSrc: string = "", plantColor: string = "", growUpTime: number = 0, mediumGrowthTime: number = 0, seedUpTime: number = 0, numberPerKg: number = 0, alivePercent: number = 0, worm: string = "", wormMonth: string = "") {
+        this._id = _id;
         this.plantId = plantId;
         this.plantName = plantName;
         this.imgSrc = imgSrc;
@@ -62,6 +51,9 @@ export class Plant implements PlantModel, PlantBuilder {
         this.alivePercent = alivePercent;
         this.worm = worm;
         this.wormMonth = wormMonth;
+    }
+    set id(id: string) {
+        this._id = id;
     }
     setPlantId(plantId: number): void {
         this.plantId = Number(plantId);
@@ -92,12 +84,5 @@ export class Plant implements PlantModel, PlantBuilder {
     }
     setWormMonths(months: string): void {
         this.wormMonth = months;
-    }
-
-}
-
-export class PlantExtended extends Plant {
-    constructor(plantInfo: Plant) {
-        super(plantInfo._id, plantInfo.plantId, plantInfo.plantName, plantInfo.imgSrc, plantInfo.plantColor, plantInfo.growUpTime, plantInfo.mediumGrowthTime, plantInfo.seedUpTime, plantInfo.numberPerKg, plantInfo.alivePercent, plantInfo.worm, plantInfo.wormMonth)
     }
 }

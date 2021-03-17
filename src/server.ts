@@ -2,9 +2,9 @@ import express, { Application, Request, Response } from 'express';
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import { trussController } from './core/truss/truss.controller';
-import { plantController } from './core/plant/plant.controller';
-import { seedController } from './core/seed/seed.controller';
+import TrussController from './core/truss/truss.controller';
+import plantController from './core/plant/plant.controller';
+import SeedController from './core/seed/seed.controller';
 import { seedStorageController } from './core/seed-storage/seed-storage.controller';
 // rest of the code remains same
 const app: Application = express();
@@ -28,9 +28,9 @@ app.use(helmet());
 app.use(morgan('common'));
 app.use(express.json());
 app.get('/', (_req: Request, res: Response) => res.send('Server is running'));
-app.use(new trussController().router);
-app.use(new plantController().router);
-app.use(new seedController().router);
+app.use(TrussController.router);
+app.use(plantController.router);
+app.use(SeedController.router);
 app.use(new seedStorageController().router);
 
 app.listen(PORT, () => {
