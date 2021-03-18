@@ -249,3 +249,17 @@ export interface createTrussRequest {
     startDate: string;
     plantNumber: number;
 }
+
+export interface updateMaxHoleRequest {
+    _id: string;
+    maxHole: number;
+}
+
+export interface clearTrussRequest {
+    _id: string;
+}
+
+export interface revertTrussRequest {
+    _id: string;
+    statusIndex: number;
+}
