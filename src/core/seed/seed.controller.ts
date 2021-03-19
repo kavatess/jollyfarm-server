@@ -1,5 +1,6 @@
 import * as express from "express";
 import { Router, Request, Response } from "express";
+import { DELETE_REQUEST, INSERT_REQUEST, SEED_REQUEST_HEAD, SEED_REQUEST_TAIL, UPDATE_REQUEST } from "../../server-constants";
 import { Seed } from "./seed.model";
 import { seedService } from "./seed.service";
 
@@ -8,11 +9,11 @@ class SeedController extends seedService {
 
     constructor() {
         super();
-        this.router.post('/seed', this.getSeedDataController());
-        this.router.post('/seed/insert', this.insertSeedController());
-        this.router.post('/seed/delete', this.deleteSeedController());
-        this.router.post('/seed/update/number', this.updateSeedController());
-        this.router.post('/seed/remove', this.deleteSeedWhenCreateTruss());
+        this.router.post(SEED_REQUEST_HEAD, this.getSeedDataController());
+        this.router.post(SEED_REQUEST_HEAD + INSERT_REQUEST, this.insertSeedController());
+        this.router.post(SEED_REQUEST_HEAD + DELETE_REQUEST, this.deleteSeedController());
+        this.router.post(SEED_REQUEST_HEAD + UPDATE_REQUEST, this.updateSeedController());
+        this.router.post(SEED_REQUEST_HEAD + SEED_REQUEST_TAIL.removeSeedAfterCreatedTruss, this.deleteSeedWhenCreateTruss());
     }
 
     private getSeedDataController() {

@@ -1,4 +1,5 @@
 import { floor } from "mathjs";
+import { getDate } from "../../server-constants";
 import { PlantModel } from "../plant/plant.model";
 
 export interface addedSeedModel {
@@ -11,55 +12,29 @@ export interface deletedSeedModel {
     idArr: string[]
 }
 
-export class Seed {
+export interface SeedModel extends PlantModel {
     _id: string;
     plantId: number;
     startDate: string;
     plantNumber: number;
-    constructor(id: string = "", plantId: number = 0, startDate: string = "", plantNumber: number = 0) {
-        this._id = id;
-        this.plantId = Number(plantId);
-        const dateStr = new Date(startDate).toString();
-        this.startDate = (dateStr === "Invalid Date") ? "" : dateStr;
-        this.plantNumber = Number(plantNumber);
+}
+
+export class Seed extends PlantModel {
+    _id: string;
+    plantId: number;
+    startDate: string;
+    plantNumber: number;
+    constructor(seed: Seed) {
+        super(seed)
+        this._id = seed._id;
+        this.plantId = Number(seed.plantId);
+        this.startDate = getDate(seed.startDate);
+        this.plantNumber = Number(seed.plantNumber);
     }
     get age(): number {
         const today = new Date(new Date().toDateString()).getTime();
         const startDate = new Date(this.startDate || today).getTime();
         return floor((today - startDate) / (86400000 * 7));
-    }
-    exportAddedSeedJSON(): addedSeedModel {
-        return {
-            startDate: this.startDate,
-            plantId: this.plantId,
-            plantNumber: this.plantNumber
-        }
-    }
-}
-
-export class SeedExtended extends Seed implements PlantModel {
-    plantName: string;
-    imgSrc: string;
-    plantColor: string;
-    growUpTime: number;
-    mediumGrowthTime: number;
-    seedUpTime: number;
-    numberPerKg: number;
-    alivePercent: number;
-    worm: string;
-    wormMonth: string;
-    constructor(seedAndPlant: any = new Seed()) {
-        super(seedAndPlant._id, seedAndPlant.plantId, seedAndPlant.startDate, seedAndPlant.plantNumber);
-        this.plantName = seedAndPlant.plantName;
-        this.imgSrc = seedAndPlant.imgSrc;
-        this.plantColor = seedAndPlant.plantColor;
-        this.growUpTime = seedAndPlant.growUpTime;
-        this.mediumGrowthTime = seedAndPlant.mediumGrowthTime;
-        this.seedUpTime = seedAndPlant.seedUpTime;
-        this.numberPerKg = seedAndPlant.numberPerKg;
-        this.alivePercent = seedAndPlant.alivePercent;
-        this.worm = seedAndPlant.worm;
-        this.wormMonth = seedAndPlant.wormMonth;
     }
     get isReadySeed(): boolean {
         const today = new Date(new Date().toString()).getTime();
@@ -68,5 +43,12 @@ export class SeedExtended extends Seed implements PlantModel {
     }
     get statusIcon(): string {
         return this.isReadySeed ? "fas fa-tractor" : "fas fa-seedling";
+    }
+    exportAddedSeedJSON(): addedSeedModel {
+        return {
+            startDate: this.startDate,
+            plantId: this.plantId,
+            plantNumber: this.plantNumber
+        }
     }
 }
