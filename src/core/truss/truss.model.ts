@@ -35,6 +35,7 @@ export interface TrussBasicInfo {
     block: string;
     index: number;
     maxHole: number;
+    plantId: string;
     startDate: string;
 }
 
@@ -128,6 +129,7 @@ export class EmptyTruss extends Truss {
             block: this.block,
             index: this.index,
             maxHole: this.maxHole,
+            plantId: this.plantId,
             startDate: this.startDate,
         }
     }
@@ -137,6 +139,7 @@ export class EmptyTruss extends Truss {
             block: this.block,
             index: this.index,
             maxHole: this.maxHole,
+            plantId: this.plantId,
             startDate: this.startDate,
             statusReal: this.statusReal
         }
@@ -198,6 +201,7 @@ export class PlantingTruss extends Truss {
             block: this.block,
             index: this.index,
             maxHole: this.maxHole,
+            plantId: this.plantId,
             startDate: this.startDate,
             plantNumber: this.latestPlantNumber,
             plantGrowth: this.realPlantGrowth,
@@ -214,6 +218,7 @@ export class PlantingTruss extends Truss {
             block: this.block,
             index: this.index,
             maxHole: this.maxHole,
+            plantId: this.plantId,
             plantName: this.plantName,
             imgSrc: this.imgSrc,
             plantColor: this.plantColor,
@@ -235,4 +240,9 @@ export class TrussInitialization implements initializeTruss {
         }
         return new EmptyTruss(truss);
     }
+}
+
+export interface HistoryForClient {
+    _id: string;
+    history: History[];
 }

@@ -7,12 +7,6 @@ export interface updateSeedRequest {
     plantNumber: number;
 }
 
-export interface addedSeedModel {
-    plantId: string;
-    startDate: string;
-    plantNumber: number;
-}
-
 export interface deletedSeedModel {
     idArr: string[]
 }
@@ -48,12 +42,5 @@ export class Seed extends PlantModel {
     }
     get statusIcon(): string {
         return this.isReadySeed ? "fas fa-tractor" : "fas fa-seedling";
-    }
-    exportAddedSeedJSON(): addedSeedModel {
-        return {
-            startDate: this.startDate,
-            plantId: this.plantId,
-            plantNumber: this.plantNumber
-        }
     }
 }

@@ -15,8 +15,8 @@ class TrussController extends trussService {
         this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.clearTruss, this.clearTrussController());
         this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.updateMaxHole, this.updateTrussMaxHoleController());
         this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.revertHistory, this.revertTrussStatusController());
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.getHistoryById, this.getHistory());
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.getRecentHistoryById, this.getRecentHistory());
+        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.getHistoryById, this.getHistoryController());
+        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.getRecentHistoryById, this.getRecentHistoryController());
     }
 
     private getTrussController() {
@@ -67,7 +67,7 @@ class TrussController extends trussService {
         }
     }
 
-    private getHistory() {
+    private getHistoryController() {
         return async (req: Request, res: Response) => {
             const trussId: simpleRequest = req.body;
             const response = await this.getOldHistoryData(trussId._id);
@@ -75,7 +75,7 @@ class TrussController extends trussService {
         }
     }
 
-    private getRecentHistory() {
+    private getRecentHistoryController() {
         return async (req: Request, res: Response) => {
             const trussId: simpleRequest = req.body;
             const response = await this.getRecentHistoryData(trussId._id);
