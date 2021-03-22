@@ -45,7 +45,7 @@ export class trussService extends mongoDB_Collection {
         return this.trussExtendedData;
     }
 
-    protected async getTrussDataForClient(block: string = "") {
+    protected async getTrussDataForClient(block: string = "all") {
         if (!this.processedTrussData.length) {
             await this.getTrussData();
             this.processedTrussData = this.trussExtendedData.map(truss => {
@@ -141,7 +141,7 @@ export class trussService extends mongoDB_Collection {
                     $lookup: {
                         from: "plant",
                         localField: "history.plantId",
-                        foreignField: "plantId",
+                        foreignField: "_id",
                         as: "history.plantType"
                     }
                 },

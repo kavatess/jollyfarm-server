@@ -1,7 +1,7 @@
 import * as express from "express";
 import { Router, Request, Response } from "express";
 import { DELETE_REQUEST, INSERT_REQUEST, SEED_REQUEST_HEAD, SEED_REQUEST_TAIL, UPDATE_REQUEST } from "../../server-constants";
-import { Seed } from "./seed.model";
+import { Seed, updateSeedRequest } from "./seed.model";
 import { seedService } from "./seed.service";
 
 class SeedController extends seedService {
@@ -43,7 +43,7 @@ class SeedController extends seedService {
 
     private updateSeedController() {
         return async (req: Request, res: Response) => {
-            const newSeed: Seed = req.body;
+            const newSeed: updateSeedRequest = req.body;
             const response = await this.updateSeedNumber(newSeed);
             await this.resetSeedData();
             res.send(response);

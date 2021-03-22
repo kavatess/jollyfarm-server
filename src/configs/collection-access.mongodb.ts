@@ -97,14 +97,14 @@ export class mongoDB_Collection {
                 $lookup: {
                     from: "plant",
                     localField: "plantId",
-                    foreignField: "plantId",
+                    foreignField: "_id",
                     as: "fromItems"
                 }
             },
             {
                 $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$fromItems", 0] }, "$$ROOT"] } }
             },
-            { $project: { fromItems: 0 } }]
+            { $project: { fromItems: 0, plantId: 0 } }]
             return await this.collection.aggregate(aggregateMethod).toArray();
         } catch (err) {
             console.log(err);

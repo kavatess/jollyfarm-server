@@ -2,8 +2,13 @@ import { floor } from "mathjs";
 import { getDate } from "../../server-constants";
 import { PlantModel } from "../plant/plant.model";
 
+export interface updateSeedRequest {
+    _id: string;
+    plantNumber: number;
+}
+
 export interface addedSeedModel {
-    plantId: number;
+    plantId: string;
     startDate: string;
     plantNumber: number;
 }
@@ -21,13 +26,13 @@ export interface SeedModel extends PlantModel {
 
 export class Seed extends PlantModel {
     _id: string;
-    plantId: number;
+    plantId: string;
     startDate: string;
     plantNumber: number;
     constructor(seed: Seed) {
         super(seed)
         this._id = seed._id;
-        this.plantId = Number(seed.plantId);
+        this.plantId = seed.plantId;
         this.startDate = getDate(seed.startDate);
         this.plantNumber = Number(seed.plantNumber);
     }

@@ -1,11 +1,11 @@
 import { mongoDB_Collection } from "../../configs/collection-access.mongodb";
-import { Seed } from "./seed.model";
+import { Seed, updateSeedRequest } from "./seed.model";
 
 export class seedService extends mongoDB_Collection {
     private static seedData: Seed[] = [];
 
     protected constructor() {
-        super("farm-database", "seed-nursery-data")
+        super("farm-database", "seed")
     }
 
     protected async getSeedData(): Promise<Seed[]> {
@@ -20,7 +20,7 @@ export class seedService extends mongoDB_Collection {
         await this.getSeedData();
     }
 
-    protected async updateSeedNumber(updatedObj: Seed): Promise<any> {
+    protected async updateSeedNumber(updatedObj: updateSeedRequest): Promise<any> {
         const updateVal = { $set: { plantNumber: updatedObj.plantNumber } };
         return await this.updateOne(updatedObj._id, updateVal);
     }

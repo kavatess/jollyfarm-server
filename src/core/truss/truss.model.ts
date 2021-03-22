@@ -35,7 +35,6 @@ export interface TrussBasicInfo {
     block: string;
     index: number;
     maxHole: number;
-    plantId: string;
     startDate: string;
 }
 
@@ -67,7 +66,7 @@ export abstract class Truss extends History implements TrussModel {
         this.maxHole = truss.maxHole;
         this.history = truss.history.map(his => new History(his));
     }
-    abstract get clientTrussData(): TrussBasicInfo;
+    abstract get clientTrussData(): any;
     abstract get recentHistoryData(): any;
     abstract initializeStatus(plantNumber: number, mediumGrowthTime: number, growUpTime: number): void;
 }
@@ -129,7 +128,6 @@ export class EmptyTruss extends Truss {
             block: this.block,
             index: this.index,
             maxHole: this.maxHole,
-            plantId: this.plantId,
             startDate: this.startDate,
         }
     }
@@ -139,7 +137,6 @@ export class EmptyTruss extends Truss {
             block: this.block,
             index: this.index,
             maxHole: this.maxHole,
-            plantId: this.plantId,
             startDate: this.startDate,
             statusReal: this.statusReal
         }
@@ -201,7 +198,6 @@ export class PlantingTruss extends Truss {
             block: this.block,
             index: this.index,
             maxHole: this.maxHole,
-            plantId: this.plantId,
             startDate: this.startDate,
             plantNumber: this.latestPlantNumber,
             plantGrowth: this.realPlantGrowth,
@@ -218,7 +214,6 @@ export class PlantingTruss extends Truss {
             block: this.block,
             index: this.index,
             maxHole: this.maxHole,
-            plantId: this.plantId,
             plantName: this.plantName,
             imgSrc: this.imgSrc,
             plantColor: this.plantColor,
