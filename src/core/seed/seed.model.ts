@@ -24,7 +24,7 @@ export class Seed extends PlantModel {
     startDate: string;
     plantNumber: number;
     constructor(seed: Seed) {
-        super(seed)
+        super(seed);
         this._id = seed._id;
         this.plantId = seed.plantId;
         this.startDate = getDate(seed.startDate);

@@ -23,11 +23,13 @@ export interface revertTrussRequest {
 
 export class newStatusRequest {
     _id: string;
+    _index: number;
     date: string;
     plantNumber: number;
     plantGrowth: number;
-    constructor(id: string, date: string, plantNumber: number, plantGrowth: number) {
+    constructor(id: string, index: number, date: string, plantNumber: number, plantGrowth: number) {
         this._id = id;
+        this._index = index;
         this.date = getDate(date);
         this.plantNumber = plantNumber;
         this.plantGrowth = plantGrowth;

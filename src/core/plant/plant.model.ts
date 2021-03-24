@@ -1,28 +1,27 @@
 export class PlantModel {
-    plantName!: string;
-    imgSrc!: string;
-    plantColor!: string;
-    growUpTime!: number;
-    mediumGrowthTime!: number;
-    seedUpTime!: number;
-    numberPerKg!: number;
-    alivePercent!: number;
-    worm!: string;
-    wormMonth!: string;
+    plantName: string;
+    imgSrc: string;
+    plantColor: string;
+    growUpTime: number;
+    mediumGrowthTime: number;
+    seedUpTime: number;
+    numberPerKg: number;
+    alivePercent: number;
+    worm: string;
+    wormMonth: string;
     constructor(plant: PlantModel) {
-        if (plant.plantName) {
-            this.plantName = plant.plantName;
-            this.imgSrc = plant.imgSrc;
-            this.plantColor = plant.plantColor;
-            this.growUpTime = plant.growUpTime;
-            this.mediumGrowthTime = plant.mediumGrowthTime;
-            this.seedUpTime = plant.seedUpTime;
-            this.numberPerKg = plant.numberPerKg;
-            this.alivePercent = plant.alivePercent;
-            this.worm = plant.worm;
-            this.wormMonth = plant.wormMonth;
-        }
+        this.plantName = plant.plantName;
+        this.imgSrc = plant.imgSrc;
+        this.plantColor = plant.plantColor;
+        this.growUpTime = plant.growUpTime;
+        this.mediumGrowthTime = plant.mediumGrowthTime;
+        this.seedUpTime = plant.seedUpTime;
+        this.numberPerKg = plant.numberPerKg;
+        this.alivePercent = plant.alivePercent;
+        this.worm = plant.worm;
+        this.wormMonth = plant.wormMonth;
     }
+
 }
 
 export interface PlantBuilder {
@@ -42,9 +41,6 @@ export class Plant extends PlantModel implements PlantBuilder {
     constructor(plant: Plant) {
         super(plant);
         this._id = plant._id;
-    }
-    set id(id: string) {
-        this._id = id;
     }
     setPlantName(plantName: string): void {
         this.plantName = plantName;

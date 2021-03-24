@@ -12,9 +12,8 @@ export const TRUSS_REQUEST_TAIL = {
     createTruss: '/create',
     clearTruss: '/clear',
     updateMaxHole: '/update/maxhole',
-    revertHistory: '/revert/history',
-    getHistoryById: '/history',
-    getRecentHistoryById: '/recent/history'
+    revertStatus: '/revert/status',
+    getTimelineById: '/timeline/:_id'
 }
 export const SEED_REQUEST_TAIL = {
     removeSeedAfterCreatedTruss: '/remove',

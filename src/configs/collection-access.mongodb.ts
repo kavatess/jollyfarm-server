@@ -90,6 +90,15 @@ export class mongoDB_Collection {
         }
     }
 
+    protected async updateOneWithHardCond(condObj: any, updateObj: any) {
+        try {
+            await this.getCollection();
+            return await this.collection.updateOne(condObj, updateObj);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     protected async joinWithPlantData(): Promise<any[]> {
         try {
             await this.getCollection();

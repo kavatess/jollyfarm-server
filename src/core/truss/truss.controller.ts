@@ -9,17 +9,16 @@ class TrussController extends trussService {
 
     constructor() {
         super();
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.getTruss, this.getTrussController());
+        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.getTruss, this.getTrussDataController());
         this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.updateStatus, this.updateTrussStatusController());
         this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.createTruss, this.createNewTrussController());
         this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.clearTruss, this.clearTrussController());
         this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.updateMaxHole, this.updateTrussMaxHoleController());
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.revertHistory, this.revertTrussStatusController());
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.getHistoryById, this.getHistoryController());
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.getRecentHistoryById, this.getRecentHistoryController());
+        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.revertStatus, this.revertTrussStatusController());
+        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.getTimelineById, this.getTimeLineDataController());
     }
 
-    private getTrussController() {
+    private getTrussDataController() {
         return async (req: Request, res: Response) => {
             const block: string = req.params.block;
             const trussArr = await this.getTrussDataForClient(block);
@@ -67,18 +66,10 @@ class TrussController extends trussService {
         }
     }
 
-    private getHistoryController() {
+    private getTimeLineDataController() {
         return async (req: Request, res: Response) => {
-            const trussId: simpleRequest = req.body;
-            const response = await this.getOldHistoryData(trussId._id);
-            res.send(response);
-        }
-    }
-
-    private getRecentHistoryController() {
-        return async (req: Request, res: Response) => {
-            const trussId: simpleRequest = req.body;
-            const response = await this.getRecentHistoryData(trussId._id);
+            const trussId: string = req.params._id;
+            const response = await this.getTimeLineData(trussId);
             res.send(response);
         }
     }
