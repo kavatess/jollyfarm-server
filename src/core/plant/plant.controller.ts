@@ -1,7 +1,7 @@
 import * as express from "express";
 import { Router, Request, Response } from "express";
 import { DELETE_REQUEST, INSERT_REQUEST, PLANT_REQUEST_HEAD, UPDATE_REQUEST } from "../../server-constants";
-import { Plant, PlantModel } from "./plant.model";
+import { PlantModel, PlantStruct } from "./plant.model";
 import { plantService } from "./plant.service";
 
 class plantController extends plantService {
@@ -24,7 +24,7 @@ class plantController extends plantService {
 
     private updatePlantController() {
         return async (req: Request, res: Response) => {
-            const plant: Plant = req.body;
+            const plant: PlantStruct = req.body;
             const response = await this.updatePlant(plant);
             await this.resetPlantData();
             res.send(response);

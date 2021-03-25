@@ -1,18 +1,20 @@
 import { mongoDB_Collection } from "../../configs/collection-access.mongodb";
-import { Seed, updateSeedRequest } from "./seed.model";
+import { Seed, SeedModel, updateSeedRequest } from "./seed.model";
 
 export class seedService extends mongoDB_Collection {
     private static seedData: Seed[] = [];
 
     protected constructor() {
-        super("farm-database", "seed")
+        super("farm-database", "seed");
+        this.resetSeedData();
     }
 
     protected async getSeedData(): Promise<Seed[]> {
         if (!seedService.seedData.length) {
-            seedService.seedData = await this.joinWithPlantData();
+            const seedRawData: SeedModel[] = await this.joinWithPlantData();
+            seedService.seedData = seedRawData.map(seed => new Seed(seed));
         }
-        return seedService.seedData;
+        return seedService.seedData.map(seed => seed.seedInfo);
     }
 
     protected async resetSeedData() {

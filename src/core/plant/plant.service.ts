@@ -1,5 +1,5 @@
 import { mongoDB_Collection } from "../../configs/collection-access.mongodb";
-import { Plant } from "./plant.model";
+import { Plant, PlantStruct } from "./plant.model";
 
 export class plantService extends mongoDB_Collection {
     private static plantData: Plant[] = [];
@@ -20,7 +20,7 @@ export class plantService extends mongoDB_Collection {
         await this.getPlantData();
     }
 
-    protected async updatePlant(updatedObj: Plant): Promise<any> {
+    protected async updatePlant(updatedObj: PlantStruct): Promise<any> {
         const updateVal = {
             $set: {
                 plantName: updatedObj.plantName,

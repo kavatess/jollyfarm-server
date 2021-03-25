@@ -1,3 +1,17 @@
+export interface PlantStruct {
+    _id: string;
+    plantName: string;
+    imgSrc: string;
+    plantColor: string;
+    growUpTime: number;
+    mediumGrowthTime: number;
+    seedUpTime: number;
+    numberPerKg: number;
+    alivePercent: number;
+    worm: string;
+    wormMonth: string;
+}
+
 export class PlantModel {
     plantName: string;
     imgSrc: string;
@@ -21,7 +35,6 @@ export class PlantModel {
         this.worm = plant.worm;
         this.wormMonth = plant.wormMonth;
     }
-
 }
 
 export interface PlantBuilder {
@@ -37,7 +50,7 @@ export interface PlantBuilder {
 }
 
 export class Plant extends PlantModel implements PlantBuilder {
-    _id: string;
+    private _id: string;
     constructor(plant: Plant) {
         super(plant);
         this._id = plant._id;

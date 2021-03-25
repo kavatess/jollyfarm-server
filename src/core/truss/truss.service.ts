@@ -41,12 +41,11 @@ export class trussService extends mongoDB_Collection {
                 {
                     $project: { root: 0 }
                 }
-            ]
-            console.log(await collection.aggregate(aggregateMethod).toArray());
+            ];
             return await collection.aggregate(aggregateMethod).toArray();
         } catch (err) {
             console.log(err);
-            return [err];
+            return [];
         }
     }
 
