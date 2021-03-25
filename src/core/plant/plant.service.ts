@@ -6,7 +6,7 @@ export class plantService extends mongoDB_Collection {
     private plantData: Plant[] = [];
 
     protected constructor() {
-        super(mongoDatabase.getDB(), "plant")
+        super(mongoDatabase.getDB(), "old-plant")
     }
 
     protected async getPlantData() {
