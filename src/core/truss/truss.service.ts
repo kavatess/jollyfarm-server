@@ -1,12 +1,13 @@
 import { mongoDB_Collection } from "../../configs/collection-access.mongodb";
 import { Plant } from "../plant/plant.model";
-import { EmptyTruss, Status, PlantingTruss, TrussModel, Truss, MileStoneModel } from "./truss.model";
+import { EmptyTruss, Status, PlantingTruss, TrussModel, Truss, MileStoneModel, Statistic } from "./truss.model";
 import { createTrussRequest, newStatusRequest, revertTrussRequest, updateMaxHoleRequest } from "./truss.request.model";
 import plantController from "../plant/plant.controller";
 import { ObjectId } from "bson";
 
-export class trussService extends mongoDB_Collection {
-    private static trussExtendedData: Truss[] = [];
+export class TrussService extends mongoDB_Collection {
+    private static trussData: Truss[] = [];
+    private static statistics: Statistic[] = [];
 
     protected constructor() {
         super("farm-database", "truss-final");
@@ -50,9 +51,11 @@ export class trussService extends mongoDB_Collection {
     }
 
     protected async initializeTrussData() {
-        if (!trussService.trussExtendedData.length) {
+        // get truss data when empty
+        if (!TrussService.trussData.length) {
             const trussData: Truss[] = await this.getTrussDataFromDB();
-            trussService.trussExtendedData = trussData.map(truss => {
+            // create 2 oop truss objs: empty-truss and planting-truss
+            TrussService.trussData = trussData.map(truss => {
                 if (truss.timeline[truss.timeline.length - 1].plantId) {
                     const trussEl = new PlantingTruss(truss);
                     this.autoUpdateTrussStatus(trussEl);
@@ -61,15 +64,18 @@ export class trussService extends mongoDB_Collection {
                 return new EmptyTruss(truss);
             });
         }
-        return trussService.trussExtendedData;
+        return TrussService.trussData;
     }
 
     private async resetTrussData() {
-        trussService.trussExtendedData = [];
-        return await this.initializeTrussData();
+        TrussService.trussData = [];
+        TrussService.statistics = [];
+        await this.initializeTrussData();
+        await this.getStatistics();
     }
 
     private async autoUpdateTrussStatus(trussEl: PlantingTruss) {
+        // if plant grow up on time
         if (trussEl.realPlantGrowth > trussEl.latestRealPlantGrowth) {
             const today = new Date().toString();
             const updateReq = new newStatusRequest(trussEl._id, trussEl.timeline.length - 1, today, trussEl.latestRealPlantNumber, trussEl.realPlantGrowth);
@@ -79,15 +85,16 @@ export class trussService extends mongoDB_Collection {
 
     protected async getTrussDataForClient(block: string = "all") {
         await this.initializeTrussData();
-        return block == "all" ? trussService.trussExtendedData.map(truss => truss.dataForClient) : trussService.trussExtendedData.filter(truss => truss.block == block).map(truss => truss.dataForClient);
+        return block == "all" ? TrussService.trussData.map(truss => truss.dataForClient) : TrussService.trussData.filter(truss => truss.block == block).map(truss => truss.dataForClient);
     }
 
     protected async getTimeLineData(trussId: string = "") {
         await this.initializeTrussData();
-        return trussId ? trussService.trussExtendedData.find(truss => truss._id == trussId)!.timelineData : trussService.trussExtendedData.map(truss => truss.timelineData);
+        return trussId ? TrussService.trussData.find(truss => truss._id == trussId)!.timelineData : TrussService.trussData.map(truss => truss.timelineData);
     }
 
     protected async updateTrussStatus(newStatusRequest: newStatusRequest) {
+        await this.initializeTrussData();
         const newStatus: Status = new Status(newStatusRequest.date, newStatusRequest.plantNumber, newStatusRequest.plantGrowth);
         const findCond = { _id: new ObjectId(newStatusRequest._id), "timeline._index": newStatusRequest._index };
         const updateVal = { $push: { "timeline.$.statusReal": newStatus } };
@@ -99,6 +106,7 @@ export class trussService extends mongoDB_Collection {
     }
 
     protected async clearTruss(clearedTrussId: string) {
+        await this.initializeTrussData();
         const truss: TrussModel = await this.getDocumentById(clearedTrussId);
         if (truss.timeline[truss.timeline.length - 1].plantId) {
             const newMileStone = new MileStoneModel(truss.timeline.length);
@@ -111,7 +119,8 @@ export class trussService extends mongoDB_Collection {
     }
 
     protected async createNewTruss(newTrussReq: createTrussRequest) {
-        const truss: Truss = trussService.trussExtendedData.find(truss => truss._id = newTrussReq._id)!;
+        await this.initializeTrussData();
+        const truss: Truss = TrussService.trussData.find(truss => truss._id = newTrussReq._id)!;
         if (!truss.timeline[truss.timeline.length - 1].plantId) {
             const plantType: Plant = await plantController.getPlantType(newTrussReq.plantId);
             truss.initializeStatus(newTrussReq.startDate, newTrussReq.plantNumber, plantType.mediumGrowthTime, plantType.growUpTime);
@@ -130,13 +139,15 @@ export class trussService extends mongoDB_Collection {
     }
 
     protected async updateTrussMaxHole(newMaxHole: updateMaxHoleRequest) {
+        await this.initializeTrussData();
         const updateVal = { $set: { maxHole: newMaxHole.maxHole } };
         await this.updateOne(newMaxHole._id, updateVal);
         return await this.resetTrussData();
     }
 
     protected async revertTrussStatus(revertReq: revertTrussRequest) {
-        const truss: Truss = trussService.trussExtendedData.find(truss => truss._id == revertReq._id)!;
+        await this.initializeTrussData();
+        const truss: Truss = TrussService.trussData.find(truss => truss._id == revertReq._id)!;
         const findCond = { _id: new ObjectId(revertReq._id), "timeline._index": truss.latestMileStone._index };
         if (revertReq.statusIndex > 0) {
             const updateVal = {
@@ -151,5 +162,28 @@ export class trussService extends mongoDB_Collection {
             return await this.resetTrussData();
         }
         return "OK";
+    }
+
+    protected async getStatistics(): Promise<Statistic[]> {
+        if (!TrussService.statistics.length) {
+            await this.initializeTrussData();
+            TrussService.trussData.forEach(truss => {
+                const plantName = truss.latestMileStone.plantName;
+                if (plantName) {
+                    const statIndex = TrussService.statistics.findIndex(stat => stat.plantName == plantName);
+                    if (statIndex >= 0) {
+                        TrussService.statistics[statIndex].plantNumber += truss.latestRealPlantNumber;
+                    } else {
+                        const stat: Statistic = {
+                            plantName: truss.latestMileStone.plantName,
+                            plantColor: truss.latestMileStone.plantColor,
+                            plantNumber: truss.latestRealPlantNumber
+                        }
+                        TrussService.statistics.push(stat);
+                    }
+                }
+            });
+        }
+        return TrussService.statistics;
     }
 }

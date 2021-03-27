@@ -13,13 +13,13 @@ class SeedController extends seedService {
         this.router.post(SEED_REQUEST_HEAD + INSERT_REQUEST, this.insertSeedController());
         this.router.post(SEED_REQUEST_HEAD + DELETE_REQUEST, this.deleteSeedController());
         this.router.post(SEED_REQUEST_HEAD + UPDATE_REQUEST, this.updateSeedController());
-        this.router.post(SEED_REQUEST_HEAD + SEED_REQUEST_TAIL.removeSeedAfterCreatedTruss, this.deleteSeedWhenCreateTruss());
+        this.router.post(SEED_REQUEST_TAIL.removeSeedAfterCreatedTruss, this.deleteSeedWhenCreateTruss());
     }
 
     private getSeedDataController() {
         return async (_req: Request, res: Response) => {
             const seedArr = await this.getSeedData();
-            res.send(seedArr);
+            res.json(seedArr);
         }
     }
 

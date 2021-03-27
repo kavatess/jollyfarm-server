@@ -1,27 +1,35 @@
-import { trussService } from "./truss.service";
+import { TrussService } from "./truss.service";
 import { Router, Request, Response } from "express";
 import * as express from "express";
 import { createTrussRequest, newStatusRequest, revertTrussRequest, simpleRequest, updateMaxHoleRequest } from "./truss.request.model";
-import { TRUSS_REQUEST_HEAD, TRUSS_REQUEST_TAIL } from "../../server-constants";
+import { TRUSS_REQUEST } from "../../server-constants";
 
-class TrussController extends trussService {
+class TrussController extends TrussService {
     router: Router = express.Router();
 
     constructor() {
         super();
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.getTruss, this.getTrussDataController());
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.updateStatus, this.updateTrussStatusController());
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.createTruss, this.createNewTrussController());
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.clearTruss, this.clearTrussController());
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.updateMaxHole, this.updateTrussMaxHoleController());
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.revertStatus, this.revertTrussStatusController());
-        this.router.post(TRUSS_REQUEST_HEAD + TRUSS_REQUEST_TAIL.getTimelineById, this.getTimeLineDataController());
+        this.router.post(TRUSS_REQUEST.getTruss, this.getTrussDataController());
+        this.router.post(TRUSS_REQUEST.getStatistics, this.getStatisticsController());
+        this.router.post(TRUSS_REQUEST.updateStatus, this.updateTrussStatusController());
+        this.router.post(TRUSS_REQUEST.createTruss, this.createNewTrussController());
+        this.router.put(TRUSS_REQUEST.clearTruss, this.clearTrussController());
+        this.router.post(TRUSS_REQUEST.updateMaxHole, this.updateTrussMaxHoleController());
+        this.router.post(TRUSS_REQUEST.revertStatus, this.revertTrussStatusController());
+        this.router.post(TRUSS_REQUEST.getTimelineById, this.getTimeLineDataController());
     }
 
     private getTrussDataController() {
         return async (req: Request, res: Response) => {
-            const block: string = req.params.block;
+            const block = req.params.block;
             const trussArr = await this.getTrussDataForClient(block);
+            res.send(trussArr);
+        }
+    }
+
+    private getStatisticsController() {
+        return async (_req: Request, res: Response) => {
+            const trussArr = await this.getStatistics();
             res.send(trussArr);
         }
     }
@@ -68,7 +76,7 @@ class TrussController extends trussService {
 
     private getTimeLineDataController() {
         return async (req: Request, res: Response) => {
-            const trussId: string = req.params._id;
+            const trussId = req.params._id;
             const response = await this.getTimeLineData(trussId);
             res.send(response);
         }

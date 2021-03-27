@@ -97,10 +97,10 @@ export abstract class Truss {
     public get recentPredictStatusArr(): Status[] {
         return this.latestMileStone.statusPredict;
     }
-    protected get latestPredictStatus(): Status {
+    public get latestPredictStatus(): Status {
         return this.recentPredictStatusArr[this.recentPredictStatusArr.length - 1];
     }
-    protected get latestPredictStatusDate(): string {
+    public get latestPredictStatusDate(): string {
         return this.latestPredictStatus.date;
     }
     protected set setRecentRealStatus(status: Status[]) {
@@ -109,7 +109,7 @@ export abstract class Truss {
     protected set setRecentPredictStatus(status: Status[]) {
         this.timeline[this.timeline.length - 1].statusPredict = status;
     }
-    protected get latestRealStatus(): Status {
+    public get latestRealStatus(): Status {
         return this.recentRealStatusArr[this.recentRealStatusArr.length - 1];
     }
     public get latestRealPlantNumber(): number {
@@ -196,7 +196,7 @@ export class PlantingTruss extends Truss {
     private get latestRealStatusLength(): number {
         return this.recentRealStatusArr.length;
     }
-    get realStatus(): Status {
+    public get realStatus(): Status {
         if (!this.latestRealStatusLength) return new Status();
         const growUpCond = this.latestRealStatusLength == 2 && this.latestRealPlantGrowth < 3 && new Date() >= new Date(this.recentPredictStatusArr[2].date);
         if (growUpCond) return this.recentPredictStatusArr[2];
@@ -204,7 +204,7 @@ export class PlantingTruss extends Truss {
         if (mediumGrowthCond) return this.recentPredictStatusArr[1];
         return this.latestRealStatus;
     }
-    get realPlantGrowth(): number {
+    public get realPlantGrowth(): number {
         if (!this.latestRealStatusLength) 0;
         const growUpCond = this.latestRealStatusLength == 2 && this.latestRealPlantGrowth < 3 && new Date() >= new Date(this.recentPredictStatusArr[2].date);
         if (growUpCond) 3;
@@ -222,7 +222,7 @@ export class PlantingTruss extends Truss {
         const startDate = new Date(this.latestMileStone.startDate).getTime();
         return floor(this.latestMileStone.growUpTime - (today - startDate) / 86400000);
     }
-    get dataForClient() {
+    public get dataForClient() {
         return {
             _id: this._id,
             block: this.block,
@@ -239,6 +239,12 @@ export class PlantingTruss extends Truss {
             numberPerKg: this.latestMileStone.numberPerKg
         }
     }
-    initializeStatus(_startDate: string, _plantNumber: number, _mediumGrowthTime: number, _growUpTime: number): void {
+    public initializeStatus(_startDate: string, _plantNumber: number, _mediumGrowthTime: number, _growUpTime: number): void {
     }
+}
+
+export interface Statistic {
+    plantName: string;
+    plantColor: string;
+    plantNumber: number;
 }
