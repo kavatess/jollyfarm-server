@@ -1,13 +1,13 @@
-export const REQUEST_URL = "/api/v1";
-export const TRUSS_REQUEST_HEAD = REQUEST_URL + "/truss";
-export const PLANT_REQUEST_HEAD = REQUEST_URL + "/plant";
-export const SEED_REQUEST_HEAD = REQUEST_URL + "/seed";
-export const SEED_STORAGE_REQUEST_HEAD = REQUEST_URL + "/storage/seed";
-export const UPDATE_REQUEST = "/update";
-export const INSERT_REQUEST = "/insert";
-export const DELETE_REQUEST = "/delete";
+const REQUEST_URL_HEAD = '/api/v1';
+const TRUSS_REQUEST_HEAD = REQUEST_URL_HEAD + '/truss';
+const PLANT_REQUEST_HEAD = REQUEST_URL_HEAD + '/plant';
+const SEED_REQUEST_HEAD = REQUEST_URL_HEAD + '/seed';
+const STORAGE_REQUEST = '/storage';
+const UPDATE_REQUEST = '/update';
+const INSERT_REQUEST = '/insert';
+const DELETE_REQUEST = '/delete';
 export const TRUSS_REQUEST = {
-    getTruss: TRUSS_REQUEST_HEAD + '/block/:block',
+    getTrussData: TRUSS_REQUEST_HEAD + '/block/:block',
     getStatistics: TRUSS_REQUEST_HEAD + '/statistics',
     updateStatus: TRUSS_REQUEST_HEAD + '/update/status',
     createTruss: TRUSS_REQUEST_HEAD + '/create',
@@ -16,9 +16,29 @@ export const TRUSS_REQUEST = {
     revertStatus: TRUSS_REQUEST_HEAD + '/revert/status',
     getTimelineById: TRUSS_REQUEST_HEAD + '/timeline/:id'
 }
-export const SEED_REQUEST_TAIL = {
-    removeSeedAfterCreatedTruss: SEED_REQUEST_HEAD + '/remove',
-    saveSeedInStorage: SEED_REQUEST_HEAD + '/storage' + INSERT_REQUEST
+export const PLANT_REQUEST = {
+    getPlantData: PLANT_REQUEST_HEAD,
+    updateOnePlant: PLANT_REQUEST_HEAD + UPDATE_REQUEST,
+    insertOnePlant: PLANT_REQUEST_HEAD + INSERT_REQUEST,
+    deleteOnePlant: PLANT_REQUEST_HEAD + DELETE_REQUEST,
+}
+export const SEED_REQUEST = {
+    getSeedData: SEED_REQUEST_HEAD,
+    updateOneSeed: SEED_REQUEST_HEAD + UPDATE_REQUEST,
+    insertManySeed: SEED_REQUEST_HEAD + INSERT_REQUEST,
+    deleteManySeed: SEED_REQUEST_HEAD + DELETE_REQUEST,
+    deleteOneSeed: SEED_REQUEST_HEAD + '/remove',
+}
+
+export const MAIN_DATABASE = 'farm-database';
+export const TRUSS_COLLECTION = 'truss-final';
+export const PLANT_COLLECTION = 'plant';
+export const SEED_COLLECTION = 'seed';
+export const STORAGE_DATABASE = 'data-storage';
+export const SEED_STORAGE_COLLECTION = 'seed-nursery-storage';
+
+export const SEED_STORAGE_REQUEST = {
+    storeManySeed: SEED_REQUEST_HEAD + STORAGE_REQUEST + INSERT_REQUEST
 }
 
 export function getDate(dateStr: string): string {

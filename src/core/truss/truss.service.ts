@@ -2,15 +2,15 @@ import { mongoDB_Collection } from "../../configs/collection-access.mongodb";
 import { Plant } from "../plant/plant.model";
 import { EmptyTruss, Status, PlantingTruss, TrussModel, Truss, MileStoneModel, Statistic } from "./truss.model";
 import { createTrussRequest, newStatusRequest, revertTrussRequest, updateMaxHoleRequest } from "./truss.request.model";
-import plantController from "../plant/plant.controller";
 import { ObjectId } from "bson";
+import { MAIN_DATABASE, TRUSS_COLLECTION } from "../../server-constants";
+import plantController from "../plant/plant.controller";
 
 export class TrussService extends mongoDB_Collection {
     private static trussData: Truss[] = [];
-    private static statistics: Statistic[] = [];
 
     protected constructor() {
-        super("farm-database", "truss-final");
+        super(MAIN_DATABASE, TRUSS_COLLECTION);
         this.resetTrussData();
     }
 
@@ -69,9 +69,7 @@ export class TrussService extends mongoDB_Collection {
 
     private async resetTrussData() {
         TrussService.trussData = [];
-        TrussService.statistics = [];
         await this.initializeTrussData();
-        await this.getStatistics();
     }
 
     private async autoUpdateTrussStatus(trussEl: PlantingTruss) {
@@ -164,26 +162,25 @@ export class TrussService extends mongoDB_Collection {
         return "OK";
     }
 
-    protected async getStatistics(): Promise<Statistic[]> {
-        if (!TrussService.statistics.length) {
-            await this.initializeTrussData();
-            TrussService.trussData.forEach(truss => {
-                const plantName = truss.latestMileStone.plantName;
-                if (plantName) {
-                    const statIndex = TrussService.statistics.findIndex(stat => stat.plantName == plantName);
-                    if (statIndex >= 0) {
-                        TrussService.statistics[statIndex].plantNumber += truss.latestRealPlantNumber;
-                    } else {
-                        const stat: Statistic = {
-                            plantName: truss.latestMileStone.plantName,
-                            plantColor: truss.latestMileStone.plantColor,
-                            plantNumber: truss.latestRealPlantNumber
-                        }
-                        TrussService.statistics.push(stat);
+    protected async getStatistics() {
+        await this.initializeTrussData();
+        const statistics: Statistic[] = [];
+        TrussService.trussData.forEach(truss => {
+            const plantName = truss.latestMileStone.plantName;
+            if (plantName) {
+                const statIndex = statistics.findIndex(stat => stat.plantName == plantName);
+                if (statIndex >= 0) {
+                    statistics[statIndex].plantNumber += truss.latestRealPlantNumber;
+                } else {
+                    const stat: Statistic = {
+                        plantName: truss.latestMileStone.plantName,
+                        plantColor: truss.latestMileStone.plantColor,
+                        plantNumber: truss.latestRealPlantNumber
                     }
+                    statistics.push(stat);
                 }
-            });
-        }
-        return TrussService.statistics;
+            }
+        });
+        return statistics;
     }
 }

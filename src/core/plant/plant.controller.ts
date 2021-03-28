@@ -1,6 +1,6 @@
 import * as express from "express";
 import { Router, Request, Response } from "express";
-import { DELETE_REQUEST, INSERT_REQUEST, PLANT_REQUEST_HEAD, UPDATE_REQUEST } from "../../server-constants";
+import { PLANT_REQUEST } from "../../server-constants";
 import { PlantModel, PlantStruct } from "./plant.model";
 import { plantService } from "./plant.service";
 
@@ -9,10 +9,10 @@ class plantController extends plantService {
 
     constructor() {
         super();
-        this.router.post(PLANT_REQUEST_HEAD, this.getPlantDataController());
-        this.router.post(PLANT_REQUEST_HEAD + UPDATE_REQUEST, this.updatePlantController());
-        this.router.post(PLANT_REQUEST_HEAD + INSERT_REQUEST, this.insertPlantController());
-        this.router.post(PLANT_REQUEST_HEAD + DELETE_REQUEST, this.deletePlantController());
+        this.router.post(PLANT_REQUEST.getPlantData, this.getPlantDataController());
+        this.router.post(PLANT_REQUEST.updateOnePlant, this.updatePlantController());
+        this.router.post(PLANT_REQUEST.insertOnePlant, this.insertPlantController());
+        this.router.post(PLANT_REQUEST.deleteOnePlant, this.deletePlantController());
     }
 
     private getPlantDataController() {

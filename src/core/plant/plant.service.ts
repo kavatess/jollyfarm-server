@@ -1,11 +1,12 @@
 import { mongoDB_Collection } from "../../configs/collection-access.mongodb";
+import { MAIN_DATABASE, PLANT_COLLECTION } from "../../server-constants";
 import { Plant, PlantStruct } from "./plant.model";
 
 export class plantService extends mongoDB_Collection {
     private static plantData: Plant[] = [];
 
     protected constructor() {
-        super("farm-database", "plant")
+        super(MAIN_DATABASE, PLANT_COLLECTION)
     }
 
     protected async getPlantData() {

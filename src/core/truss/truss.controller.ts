@@ -9,7 +9,7 @@ class TrussController extends TrussService {
 
     constructor() {
         super();
-        this.router.post(TRUSS_REQUEST.getTruss, this.getTrussDataController());
+        this.router.post(TRUSS_REQUEST.getTrussData, this.getTrussDataController());
         this.router.post(TRUSS_REQUEST.getStatistics, this.getStatisticsController());
         this.router.post(TRUSS_REQUEST.updateStatus, this.updateTrussStatusController());
         this.router.post(TRUSS_REQUEST.createTruss, this.createNewTrussController());

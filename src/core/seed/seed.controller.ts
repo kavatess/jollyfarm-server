@@ -1,6 +1,6 @@
 import * as express from "express";
 import { Router, Request, Response } from "express";
-import { DELETE_REQUEST, INSERT_REQUEST, SEED_REQUEST_HEAD, SEED_REQUEST_TAIL, UPDATE_REQUEST } from "../../server-constants";
+import { SEED_REQUEST } from "../../server-constants";
 import { Seed, updateSeedRequest } from "./seed.model";
 import { seedService } from "./seed.service";
 
@@ -9,11 +9,11 @@ class SeedController extends seedService {
 
     constructor() {
         super();
-        this.router.post(SEED_REQUEST_HEAD, this.getSeedDataController());
-        this.router.post(SEED_REQUEST_HEAD + INSERT_REQUEST, this.insertSeedController());
-        this.router.post(SEED_REQUEST_HEAD + DELETE_REQUEST, this.deleteSeedController());
-        this.router.post(SEED_REQUEST_HEAD + UPDATE_REQUEST, this.updateSeedController());
-        this.router.post(SEED_REQUEST_TAIL.removeSeedAfterCreatedTruss, this.deleteSeedWhenCreateTruss());
+        this.router.post(SEED_REQUEST.getSeedData, this.getSeedDataController());
+        this.router.post(SEED_REQUEST.updateOneSeed, this.updateSeedController());
+        this.router.post(SEED_REQUEST.insertManySeed, this.insertSeedController());
+        this.router.post(SEED_REQUEST.deleteManySeed, this.deleteSeedController());
+        this.router.post(SEED_REQUEST.deleteOneSeed, this.deleteSeedWhenCreateTruss());
     }
 
     private getSeedDataController() {

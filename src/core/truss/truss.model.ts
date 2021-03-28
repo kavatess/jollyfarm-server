@@ -147,7 +147,7 @@ export class EmptyTruss extends Truss {
         super(emptyTruss);
     }
 
-    initializeStatus(startDate: string, plantNumber: number = 0, mediumGrowthTime: number = 0, growUpTime: number = 0): void {
+    public initializeStatus(startDate: string, plantNumber: number = 0, mediumGrowthTime: number = 0, growUpTime: number = 0): void {
         this.createStatusReal(startDate, plantNumber);
         this.createStatusPredict(mediumGrowthTime, growUpTime);
     }
@@ -177,7 +177,7 @@ export class EmptyTruss extends Truss {
             this.pushPredictStatus = new Status(predictDate, plantNumber, 3);
         }
     }
-    get dataForClient(): TrussBasicInfo {
+    public get dataForClient(): TrussBasicInfo {
         return {
             _id: this._id,
             block: this.block,

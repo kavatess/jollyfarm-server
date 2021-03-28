@@ -41,7 +41,7 @@ export class Seed extends PlantModel {
         return (today - startDate) > 86400000 * this.seedUpTime;
     }
 
-    get seedInfo(): any {
+    public get seedInfo(): any {
         return {
             _id: this._id,
             plantId: this.plantId,

@@ -1,11 +1,12 @@
 import { mongoDB_Collection } from "../../configs/collection-access.mongodb";
+import { MAIN_DATABASE, SEED_COLLECTION } from "../../server-constants";
 import { Seed, SeedModel, updateSeedRequest } from "./seed.model";
 
 export class seedService extends mongoDB_Collection {
     private static seedData: Seed[] = [];
 
     protected constructor() {
-        super("farm-database", "seed");
+        super(MAIN_DATABASE, SEED_COLLECTION);
         this.resetSeedData();
     }
 
