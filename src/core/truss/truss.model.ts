@@ -1,4 +1,4 @@
-import { floor } from "mathjs";
+import { abs, ceil, floor } from "mathjs";
 import { getDate } from "../../server-constants";
 import { PlantModel } from "../plant/plant.model";
 
@@ -205,11 +205,11 @@ export class PlantingTruss extends Truss {
         return this.latestRealStatus;
     }
     public get realPlantGrowth(): number {
-        if (!this.latestRealStatusLength) 0;
+        if (!this.latestRealStatusLength) return 0;
         const growUpCond = this.latestRealStatusLength == 2 && this.latestRealPlantGrowth < 3 && new Date() >= new Date(this.recentPredictStatusArr[2].date);
-        if (growUpCond) 3;
+        if (growUpCond) return 3;
         const mediumGrowthCond = this.latestRealStatusLength == 1 && new Date() >= new Date(this.recentPredictStatusArr[1].date);
-        if (mediumGrowthCond) 2;
+        if (mediumGrowthCond) return 2;
         return this.latestRealPlantGrowth;
     }
     private get harvestDate(): number {
@@ -217,10 +217,10 @@ export class PlantingTruss extends Truss {
         const harvestStatus = this.recentRealStatusArr.find(status => status.plantGrowth == 3);
         if (harvestStatus) {
             const harvestDate = new Date(harvestStatus.date).getTime();
-            return floor((today - harvestDate) / 86400000);
+            return ceil((today - harvestDate) / 86400000);
         }
         const startDate = new Date(this.latestMileStone.startDate).getTime();
-        return floor(this.latestMileStone.growUpTime - (today - startDate) / 86400000);
+        return abs(floor(this.latestMileStone.growUpTime - (today - startDate) / 86400000));
     }
     public get dataForClient() {
         return {
@@ -233,6 +233,7 @@ export class PlantingTruss extends Truss {
             plantNumber: this.latestRealPlantNumber,
             plantGrowth: this.realPlantGrowth,
             predictHarvestDate: this.harvestDate,
+            percentage: floor(this.latestRealPlantNumber / this.maxHole * 100),
             plantName: this.latestMileStone.plantName,
             imgSrc: this.latestMileStone.imgSrc,
             plantColor: this.latestMileStone.plantColor,

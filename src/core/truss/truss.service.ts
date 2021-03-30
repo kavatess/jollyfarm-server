@@ -76,7 +76,7 @@ export class TrussService extends mongoDB_Collection {
         // if plant grow up on time
         if (trussEl.realPlantGrowth > trussEl.latestRealPlantGrowth) {
             const today = new Date().toString();
-            const updateReq = new newStatusRequest(trussEl._id, trussEl.timeline.length - 1, today, trussEl.latestRealPlantNumber, trussEl.realPlantGrowth);
+            const updateReq = new newStatusRequest(trussEl._id, today, trussEl.latestRealPlantNumber, trussEl.realPlantGrowth);
             return await this.updateTrussStatus(updateReq);
         }
     }
@@ -93,14 +93,21 @@ export class TrussService extends mongoDB_Collection {
 
     protected async updateTrussStatus(newStatusRequest: newStatusRequest) {
         await this.initializeTrussData();
-        const newStatus: Status = new Status(newStatusRequest.date, newStatusRequest.plantNumber, newStatusRequest.plantGrowth);
-        const findCond = { _id: new ObjectId(newStatusRequest._id), "timeline._index": newStatusRequest._index };
-        const updateVal = { $push: { "timeline.$.statusReal": newStatus } };
-        await this.updateOneWithHardCond(findCond, updateVal);
-        if (!newStatus.plantNumber) {
-            return await this.clearTruss(newStatusRequest._id);
+        const updatedTruss: Truss = TrussService.trussData.find(truss => truss._id == newStatusRequest._id)!;
+        const newPlantGrowthCond = updatedTruss.latestRealPlantGrowth <= newStatusRequest.plantGrowth;
+        const newPlantNumberCond = updatedTruss.latestRealPlantNumber >= newStatusRequest.plantNumber;
+        const exceptCond = updatedTruss.latestRealPlantGrowth == newStatusRequest.plantGrowth && updatedTruss.latestRealPlantNumber == newStatusRequest.plantNumber;
+        if (newPlantGrowthCond && newPlantNumberCond && !exceptCond) {
+            const newStatus: Status = new Status(newStatusRequest.date, newStatusRequest.plantNumber, newStatusRequest.plantGrowth);
+            const findCond = { _id: new ObjectId(newStatusRequest._id), "timeline._index": updatedTruss.latestMileStone._index };
+            const updateVal = { $push: { "timeline.$.statusReal": newStatus } };
+            await this.updateOneWithHardCond(findCond, updateVal);
+            if (!newStatus.plantNumber) {
+                return await this.clearTruss(newStatusRequest._id);
+            }
+            return await this.resetTrussData();
         }
-        return await this.resetTrussData();
+        console.log("Invalid status request.");
     }
 
     protected async clearTruss(clearedTrussId: string) {
@@ -113,7 +120,7 @@ export class TrussService extends mongoDB_Collection {
             await this.updateOne(clearedTrussId, updateVal);
             return await this.resetTrussData();
         }
-        return "OK";
+        console.log(`Cannot clear truss with ID: "${clearedTrussId}" because it is now empty.`);
     }
 
     protected async createNewTruss(newTrussReq: createTrussRequest) {
@@ -133,7 +140,7 @@ export class TrussService extends mongoDB_Collection {
             await this.updateOne(newTrussReq._id, updateVal);
             return await this.resetTrussData();
         }
-        return "OK";
+        console.log(`Cannot create truss with ID: "${newTrussReq._id}" because it is now being planted.`);
     }
 
     protected async updateTrussMaxHole(newMaxHole: updateMaxHoleRequest) {
@@ -145,9 +152,14 @@ export class TrussService extends mongoDB_Collection {
 
     protected async revertTrussStatus(revertReq: revertTrussRequest) {
         await this.initializeTrussData();
-        const truss: Truss = TrussService.trussData.find(truss => truss._id == revertReq._id)!;
-        const findCond = { _id: new ObjectId(revertReq._id), "timeline._index": truss.latestMileStone._index };
+        const truss = TrussService.trussData.find(truss => truss._id == revertReq._id);
+        if (!truss) {
+            console.log(`There is no ID: "${revertReq._id}" to revert.`);
+            return "Client Error";
+        }
+
         if (revertReq.statusIndex > 0) {
+            const findCond = { _id: new ObjectId(revertReq._id), "timeline._index": truss.latestMileStone._index };
             const updateVal = {
                 $push: {
                     "timeline.$.statusReal": {
@@ -159,7 +171,9 @@ export class TrussService extends mongoDB_Collection {
             await this.updateOneWithHardCond(findCond, updateVal);
             return await this.resetTrussData();
         }
-        return "OK";
+
+        console.log("Invalid index status to revert.");
+        return "Client Error";
     }
 
     protected async getStatistics() {
