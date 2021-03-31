@@ -22,7 +22,7 @@ class TrussController extends TrussService {
     private getTrussDataController() {
         return async (req: Request, res: Response) => {
             const block = req.params.block;
-            const trussArr = await this.getTrussDataForClient(block);
+            const trussArr = await this.getTrussArrByBlock(block);
             res.send(trussArr);
         }
     }

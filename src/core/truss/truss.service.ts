@@ -86,6 +86,72 @@ export class TrussService extends mongoDB_Collection {
         return block == "all" ? TrussService.trussData.map(truss => truss.dataForClient) : TrussService.trussData.filter(truss => truss.block == block).map(truss => truss.dataForClient);
     }
 
+    protected async getTrussArrByBlock(block: string = "all"): Promise<Truss[]> {
+        await this.initializeTrussData();
+        if (block == "all") {
+            return TrussService.trussData.map(truss => truss.dataForClient);
+        }
+        const trussArr = TrussService.trussData.filter(truss => truss.block == block).map(truss => truss.dataForClient);
+        if (block == "BS") {
+            return this.sortDataInBlockBS(trussArr);
+        }
+        if (block == "C") {
+            return this.sortDataInBlockC(trussArr);
+        }
+        if (block == "CT") {
+            return this.sortDataInBlockCT(trussArr);
+        }
+        if (block == "D") {
+            return this.sortDataInBlockD(trussArr);
+        }
+        return this.sortDataInBlockA_B_BN(trussArr);
+    }
+
+    private sortDataInBlockA_B_BN(trussArr: Truss[]): Truss[] {
+        return trussArr.sort((a, b) => b.index - a.index);
+    }
+
+    private sortDataInBlockBS(trussArr: any[]): Truss[] {
+        trussArr.sort((a, b) => b.index - a.index);
+        trussArr.splice(1, 0, null, null);
+        return trussArr;
+    }
+
+    private sortDataInBlockC(trussArr: Truss[]): Truss[] {
+        trussArr.sort((a, b) => a.index - b.index);
+        for (var index = 0; index < trussArr.length; index++) {
+            if (index < 4) {
+                const temp1: Truss = trussArr[index];
+                trussArr[index] = trussArr[12 + index];
+                trussArr[12 + index] = temp1;
+            }
+            if (index > 3 && index < 8) {
+                const temp2: Truss = trussArr[index];
+                trussArr[index] = trussArr[4 + index];
+                trussArr[4 + index] = temp2;
+            }
+        }
+        return trussArr;
+    }
+
+    private sortDataInBlockCT(trussArr: Truss[]): Truss[] {
+        trussArr.sort((a, b) => a.index - b.index);
+        for (var index = 0; index < 4; index++) {
+            if (index < 4) {
+                const temp1: Truss = trussArr[index];
+                trussArr[index] = trussArr[8 + index];
+                trussArr[8 + index] = temp1;
+            }
+        }
+        return trussArr;
+    }
+
+    private sortDataInBlockD(trussArr: any[]): Truss[] {
+        trussArr.sort((a, b) => a.index - b.index);
+        trussArr.splice(1, 0, null, null);
+        return trussArr;
+    }
+
     protected async getTimeLineData(trussId: string = "") {
         await this.initializeTrussData();
         return trussId ? TrussService.trussData.find(truss => truss._id == trussId)!.timelineData : TrussService.trussData.map(truss => truss.timelineData);
