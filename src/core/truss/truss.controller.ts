@@ -76,7 +76,7 @@ class TrussController extends TrussService {
 
     private getTimeLineDataController() {
         return async (req: Request, res: Response) => {
-            const trussId = req.params._id;
+            const trussId = req.params.id;
             const response = await this.getTimeLineData(trussId);
             res.send(response);
         }
