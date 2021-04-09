@@ -1,3 +1,4 @@
+import { ObjectId } from "bson";
 import { floor } from "mathjs";
 import { getDate } from "../../server-constants";
 import { PlantModel } from "../plant/plant.model";
@@ -13,14 +14,14 @@ export interface deletedSeedModel {
 
 export interface SeedModel extends PlantModel {
     _id: string;
-    plantId: string;
+    plantId: ObjectId;
     startDate: string;
     plantNumber: number;
 }
 
 export class Seed extends PlantModel {
     private _id: string;
-    private plantId: string;
+    private plantId: ObjectId;
     private startDate: string;
     private plantNumber: number;
     constructor(seed: SeedModel) {
@@ -31,12 +32,12 @@ export class Seed extends PlantModel {
         this.plantNumber = Number(seed.plantNumber);
     }
     private get age(): number {
-        const today = new Date(new Date().toDateString()).getTime();
+        const today = new Date().getTime();
         const startDate = new Date(this.startDate || today).getTime();
         return floor((today - startDate) / (86400000 * 7));
     }
     private get isReadySeed(): boolean {
-        const today = new Date(new Date().toString()).getTime();
+        const today = new Date().getTime();
         const startDate = new Date(this.startDate || today).getTime();
         return (today - startDate) > 86400000 * this.seedUpTime;
     }
