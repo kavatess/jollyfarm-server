@@ -1,3 +1,5 @@
+export const DB_URI = 'mongodb+srv://kavatess:2306@cluster0.gfleb.mongodb.net/test?retryWrites=true&w=majority';
+export const DB_CONNECT_OPTIONS = { useNewUrlParser: true, useUnifiedTopology: true };
 const REQUEST_URL_HEAD = '/api/v1';
 const TRUSS_REQUEST_HEAD = REQUEST_URL_HEAD + '/truss';
 const PLANT_REQUEST_HEAD = REQUEST_URL_HEAD + '/plant';
@@ -20,14 +22,14 @@ export const PLANT_REQUEST = {
     getPlantData: PLANT_REQUEST_HEAD,
     updateOnePlant: PLANT_REQUEST_HEAD + UPDATE_REQUEST,
     insertOnePlant: PLANT_REQUEST_HEAD + INSERT_REQUEST,
-    deleteOnePlant: PLANT_REQUEST_HEAD + DELETE_REQUEST,
+    deleteOnePlant: PLANT_REQUEST_HEAD + DELETE_REQUEST + '/:id',
 }
 export const SEED_REQUEST = {
     getSeedData: SEED_REQUEST_HEAD,
     updateOneSeed: SEED_REQUEST_HEAD + UPDATE_REQUEST,
     insertManySeed: SEED_REQUEST_HEAD + INSERT_REQUEST,
     deleteManySeed: SEED_REQUEST_HEAD + DELETE_REQUEST,
-    deleteOneSeed: SEED_REQUEST_HEAD + '/remove',
+    deleteOneSeed: SEED_REQUEST_HEAD + '/remove/:id',
 }
 
 export const MAIN_DATABASE = 'farm-database';
@@ -43,5 +45,5 @@ export const SEED_STORAGE_REQUEST = {
 
 export function getDate(dateStr: string): string {
     const date = new Date(dateStr).toString();
-    return (date === "Invalid Date") ? dateStr : date;
+    return (date === 'Invalid Date') ? dateStr : date;
 }

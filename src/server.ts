@@ -2,10 +2,10 @@ import express, { Application } from 'express';
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import TrussController from './core/truss/truss.controller';
-import plantController from './core/plant/plant.controller';
-import SeedController from './core/seed/seed.controller';
-import { seedStorageController } from './core/seed-storage/seed-storage.controller';
+import { TrussRouter } from './core/truss/truss.routes';
+import { SeedRouter } from './core/seed/seed.routes';
+import { SeedStorageRouter } from './core/seed-storage/seed-storage.routes';
+import { PlantRouter } from './core/plant/plant.routes';
 // rest of the code remains same
 const app: Application = express();
 const PORT = process.env.PORT || 1000;
@@ -27,10 +27,10 @@ app.use(cors({
 app.use(helmet());
 app.use(morgan('common'));
 app.use(express.json());
-app.use(TrussController.router);
-app.use(plantController.router);
-app.use(SeedController.router);
-app.use(new seedStorageController().router);
+app.use(TrussRouter);
+app.use(PlantRouter);
+app.use(SeedRouter);
+app.use(SeedStorageRouter);
 
 app.listen(PORT, () => {
     console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);

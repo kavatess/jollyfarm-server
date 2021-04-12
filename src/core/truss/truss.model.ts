@@ -1,6 +1,6 @@
 import { abs, ceil, floor } from "mathjs";
 import { getDate } from "../../server-constants";
-import { PlantModel } from "../plant/plant.model";
+import { PlantInfo } from "../plant/plant.model";
 
 export class Status {
     date: string;
@@ -31,7 +31,7 @@ export class MileStoneModel {
     }
 }
 
-export class MileStone extends PlantModel implements MileStoneModel {
+export class MileStone extends PlantInfo implements MileStoneModel {
     _index: number;
     plantId: string;
     startDate: string;

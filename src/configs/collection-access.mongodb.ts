@@ -1,37 +1,43 @@
 import { Collection, Db, ObjectId } from "mongodb";
-import { mongoDatabase } from "./connect.mongodb";
+import { MongoDatabase } from "./connect.mongodb";
 
-export class mongoDB_Collection {
+export class MongoDB_Collection {
     private collection!: Collection;
 
-    protected constructor(private dbName: string, private colName: string) {
+    constructor(private dbName: string, private colName: string) {
         this.getCollection();
     }
 
-    protected async getCollection() {
+    async getCollection() {
         if (!this.collection) {
-            const db: Db = await mongoDatabase.getDatabase(this.dbName);
+            const db: Db = await MongoDatabase.getDatabase(this.dbName);
             this.collection = db.collection(this.colName);
         }
         return this.collection;
     }
 
-    protected async findOneDocument(findCond: any) {
+    async findOneById(findCond: any) {
         try {
             await this.getCollection();
             return await this.collection.findOne(findCond);
         } catch (err) {
             console.log(err);
+            return err;
         }
     }
 
-    protected async getDocumentById(id: string) {
-        await this.getCollection();
-        const findCond = { _id: new ObjectId(id) };
-        return await this.findOneDocument(findCond);
+    async getDocumentById(id: string) {
+        try {
+            await this.getCollection();
+            const findCond = { _id: new ObjectId(id) };
+            return await this.findOneById(findCond);
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
-    protected async getDocumentWithCond(findCond = {}): Promise<any[]> {
+    async getDocumentWithCond(findCond = {}): Promise<any[]> {
         try {
             await this.getCollection();
             return await this.collection.find(findCond).toArray();
@@ -41,35 +47,39 @@ export class mongoDB_Collection {
         }
     }
 
-    protected async insertOne(obj: any) {
+    async insertOne(obj: any) {
         try {
             await this.getCollection();
             return await this.collection.insertOne(obj);
         } catch (err) {
             console.log(err);
+            return err;
         }
     }
 
-    protected async insertMany(objArr: any[]) {
+    async insertMany(objArr: any[]) {
         try {
             await this.getCollection();
             return await this.collection.insertMany(objArr);
         } catch (err) {
             console.log(err);
+            return err;
         }
     }
 
-    protected async deleteOneById(deletedObjId: string) {
+    async deleteOneById(deletedObjId: string) {
         try {
             await this.getCollection();
             const deleteCond = { _id: new ObjectId(deletedObjId) };
+            console.log(deleteCond);
             return await this.collection.deleteOne(deleteCond);
         } catch (err) {
             console.log(err);
+            return err;
         }
     }
 
-    protected async deleteManyByIdArr(deletedObjIdArr: string[]) {
+    async deleteManyByIdArr(deletedObjIdArr: string[]) {
         try {
             await this.getCollection();
             const deletedIdArr = deletedObjIdArr.map(id => new ObjectId(id));
@@ -77,29 +87,32 @@ export class mongoDB_Collection {
             return await this.collection.deleteMany(deleteCond);
         } catch (err) {
             console.log(err);
+            return err;
         }
     }
 
-    protected async updateOne(updatedObjId: string, updateVal: any) {
+    async updateOne(updatedObjId: string, updateVal: any) {
         try {
             await this.getCollection();
             const findCond = { _id: new ObjectId(updatedObjId) };
             return await this.collection.updateOne(findCond, updateVal);
         } catch (err) {
             console.log(err);
+            return err;
         }
     }
 
-    protected async updateOneWithHardCond(condObj: any, updateObj: any) {
+    async updateOneWithHardCond(condObj: any, updateObj: any) {
         try {
             await this.getCollection();
             return await this.collection.updateOne(condObj, updateObj);
         } catch (err) {
             console.log(err);
+            return err;
         }
     }
 
-    protected async joinWithPlantData(): Promise<any[]> {
+    async joinWithPlantData(): Promise<any[]> {
         try {
             await this.getCollection();
             const aggregateMethod = [{

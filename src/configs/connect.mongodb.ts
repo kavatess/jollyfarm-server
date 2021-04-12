@@ -1,26 +1,26 @@
 import mongodb, { Db, MongoClient } from "mongodb";
+import { DB_CONNECT_OPTIONS, DB_URI } from "../server-constants";
 
-export class mongoDatabase {
-    private static url: string = "mongodb+srv://kavatess:2306@cluster0.gfleb.mongodb.net/test?retryWrites=true&w=majority";
+export class MongoDatabase {
     private static mongodb: MongoClient;
     private constructor() {
     }
-    
+
     private static async connect() {
         try {
-            return await mongodb.connect(mongoDatabase.url, { useNewUrlParser: true, useUnifiedTopology: true });
+            return await mongodb.connect(DB_URI, DB_CONNECT_OPTIONS);
         } catch (err) {
             console.log(err);
             process.exit();
         }
     }
     private static async dbConnection() {
-        if (!mongoDatabase.mongodb) {
+        if (!MongoDatabase.mongodb) {
             console.log(`Establishing database connection...`);
-            mongoDatabase.mongodb = await this.connect();
+            MongoDatabase.mongodb = await this.connect();
             console.log(`Database connection established successfully.`);
         }
-        return mongoDatabase.mongodb;
+        return MongoDatabase.mongodb;
     }
     public static async getDatabase(dbName: string): Promise<Db> {
         const mongoDB = await this.dbConnection();

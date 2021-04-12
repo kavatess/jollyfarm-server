@@ -1,7 +1,7 @@
 import { ObjectId } from "bson";
 import { floor } from "mathjs";
 import { getDate } from "../../server-constants";
-import { PlantModel } from "../plant/plant.model";
+import { PlantInfo } from "../plant/plant.model";
 
 export interface updateSeedRequest {
     _id: string;
@@ -12,14 +12,14 @@ export interface deletedSeedModel {
     idArr: string[]
 }
 
-export interface SeedModel extends PlantModel {
+export interface SeedModel extends PlantInfo {
     _id: string;
     plantId: ObjectId;
     startDate: string;
     plantNumber: number;
 }
 
-export class Seed extends PlantModel {
+export class Seed extends PlantInfo {
     private _id: string;
     private plantId: ObjectId;
     private startDate: string;

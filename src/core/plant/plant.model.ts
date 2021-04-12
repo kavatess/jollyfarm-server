@@ -1,4 +1,4 @@
-export interface PlantStruct {
+export interface PlantModel {
     _id: string;
     plantName: string;
     imgSrc: string;
@@ -12,7 +12,7 @@ export interface PlantStruct {
     wormMonth: string;
 }
 
-export class PlantModel {
+export class PlantInfo {
     plantName: string;
     imgSrc: string;
     plantColor: string;
@@ -23,7 +23,7 @@ export class PlantModel {
     alivePercent: number;
     worm: string;
     wormMonth: string;
-    constructor(plant: PlantModel) {
+    constructor(plant: PlantInfo) {
         this.plantName = plant.plantName;
         this.imgSrc = plant.imgSrc;
         this.plantColor = plant.plantColor;
@@ -49,7 +49,7 @@ export interface PlantBuilder {
     setWormMonths(months: string): void;
 }
 
-export class Plant extends PlantModel implements PlantBuilder {
+export class Plant extends PlantInfo implements PlantBuilder {
     private _id: string;
     constructor(plant: Plant) {
         super(plant);
