@@ -3,9 +3,7 @@ import { getDate } from "../../server-constants";
 export interface CreateTrussRequest {
     _id: string;
     seedId: string;
-    plantId: number;
     startDate: string;
-    plantNumber: number;
 }
 
 export interface UpdateMaxHoleRequest {

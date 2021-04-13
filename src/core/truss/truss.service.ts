@@ -153,11 +153,11 @@ class TrussService {
             const firstStatus = new Status(newTrussReq.startDate, selectedSeed.plantNumber, 1);
             if (selectedSeed.plantNumber > truss.maxHole) {
                 firstStatus.plantNumber = truss.maxHole;
-                SeedService.updateSeedNumber(selectedSeed._id, selectedSeed.plantNumber - truss.maxHole);
+                SeedService.updateSeedNumber(selectedSeed._id, Number(selectedSeed.plantNumber - truss.maxHole));
             }
             const updateVal = {
                 $set: {
-                    plantId: newTrussReq.plantId,
+                    plantId: selectedSeed.plantId,
                     startDate: newTrussReq.startDate,
                     realStatus: [firstStatus],
                 }
