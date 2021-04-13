@@ -1,27 +1,28 @@
 import { getDate } from "../../server-constants";
 
-export interface createTrussRequest {
+export interface CreateTrussRequest {
     _id: string;
+    seedId: string;
     plantId: number;
     startDate: string;
     plantNumber: number;
 }
 
-export interface updateMaxHoleRequest {
+export interface UpdateMaxHoleRequest {
     _id: string;
     maxHole: number;
 }
 
-export interface simpleRequest {
+export interface SimpleRequest {
     _id: string;
 }
 
-export interface revertTrussRequest {
+export interface RevertTrussRequest {
     _id: string;
     statusIndex: number;
 }
 
-export class newStatusRequest {
+export class NewStatusRequest {
     _id: string;
     date: string;
     plantNumber: number;

@@ -16,21 +16,11 @@ export class MongoDB_Collection {
         return this.collection;
     }
 
-    async findOneById(findCond: any) {
-        try {
-            await this.getCollection();
-            return await this.collection.findOne(findCond);
-        } catch (err) {
-            console.log(err);
-            return err;
-        }
-    }
-
     async getDocumentById(id: string) {
         try {
             await this.getCollection();
             const findCond = { _id: new ObjectId(id) };
-            return await this.findOneById(findCond);
+            return await this.collection.findOne(findCond);
         } catch (err) {
             console.log(err);
             return err;

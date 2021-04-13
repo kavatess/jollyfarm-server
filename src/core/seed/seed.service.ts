@@ -1,9 +1,10 @@
 import { ObjectId } from "bson";
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
-import { MAIN_DATABASE, SEED_COLLECTION } from "../../server-constants";
-import { Seed, SeedModel, updateSeedRequest } from "./seed.model";
+import { MAIN_DATABASE, SEED_COLLECTION, SEED_STORAGE_COLLECTION, STORAGE_DATABASE } from "../../server-constants";
+import { Seed, SeedModel } from "./seed.model";
 
-const seedCollection = new MongoDB_Collection(MAIN_DATABASE, SEED_COLLECTION);
+const SeedStorageCollection = new MongoDB_Collection(STORAGE_DATABASE, SEED_STORAGE_COLLECTION);
+const SeedCollection = new MongoDB_Collection(MAIN_DATABASE, SEED_COLLECTION);
 
 class SeedService {
     private static seedData: Seed[] = [];
@@ -14,7 +15,7 @@ class SeedService {
 
     async getSeedData(): Promise<Seed[]> {
         if (!SeedService.seedData.length) {
-            const seedRawData: SeedModel[] = await seedCollection.joinWithPlantData();
+            const seedRawData: SeedModel[] = await SeedCollection.joinWithPlantData();
             SeedService.seedData = seedRawData.map(seed => new Seed(seed));
         }
         return SeedService.seedData.map(seed => seed.seedInfo);
@@ -30,24 +31,29 @@ class SeedService {
             seed.plantId = new ObjectId(seed.plantId);
             return seed;
         });
-        await seedCollection.insertMany(newSeedList);
+        await SeedCollection.insertMany(newSeedList);
+        await SeedStorageCollection.insertMany(newSeedList);
         return await this.resetSeedData();
     }
 
-    async updateSeedNumber(updatedObj: updateSeedRequest): Promise<any> {
-        const updateVal = { $set: { plantNumber: updatedObj.plantNumber } };
-        await seedCollection.updateOne(updatedObj._id, updateVal);
+    async updateSeedNumber(updatedSeedId: string, newPlantNumber: number): Promise<any> {
+        const updateVal = { $set: { plantNumber: newPlantNumber } };
+        await SeedCollection.updateOne(updatedSeedId, updateVal);
         return await this.resetSeedData();
     }
 
     async deleteManySeedById(seedIdArr: string[]) {
-        await seedCollection.deleteManyByIdArr(seedIdArr);
+        await SeedCollection.deleteManyByIdArr(seedIdArr);
         return await this.resetSeedData();
     }
 
     async deleteOneSeedById(seedId: string) {
-        await seedCollection.deleteOneById(seedId);
+        await SeedCollection.deleteOneById(seedId);
         return await this.resetSeedData();
+    }
+
+    async getSeedInfo(seedId: string): Promise<SeedModel> {
+        return await SeedCollection.getDocumentById(seedId);
     }
 }
 

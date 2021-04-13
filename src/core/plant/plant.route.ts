@@ -2,7 +2,7 @@ import * as express from "express";
 import { Router, Request, Response } from "express";
 import { REQUEST_URL_HEAD } from "../../server-constants";
 import { PlantModel } from "./plant.model";
-import PlantService from "./plant.services";
+import PlantService from "./plant.service";
 
 export const PlantRouter: Router = express.Router();
 
@@ -29,6 +29,6 @@ PlantRouter.post(REQUEST_URL_HEAD + '/plant/delete', async (req: Request, res: R
     res.send(response);
 });
 
-export async function getPlantType(plantId: number) {
+export async function getPlantType(plantId: string) {
     return await PlantService.getPlantInfo(plantId);
 }
