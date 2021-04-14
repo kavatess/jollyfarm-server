@@ -16,7 +16,7 @@ class SeedService {
     async getSeedData(): Promise<Seed[]> {
         if (!SeedService.seedData.length) {
             const seedRawData: SeedModel[] = await SeedCollection.joinWithPlantData();
-            SeedService.seedData = seedRawData.map(seed => new Seed(seed));
+            SeedService.seedData = seedRawData.map(seed => new Seed(seed)).sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
         }
         return SeedService.seedData.map(seed => seed.seedInfo);
     }

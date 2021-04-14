@@ -147,13 +147,15 @@ class TrussService {
 
     async createNewTruss(newTrussReq: CreateTrussRequest) {
         await TrussService.initializeTrussData();
-        const truss: Truss = TrussService.trussData.find(truss => truss._id = newTrussReq._id)!;
+        const truss: Truss = TrussService.trussData.find(truss => truss._id == newTrussReq._id)!;
         if (!truss.plantId) {
             const selectedSeed: SeedModel = await SeedService.getSeedInfo(newTrussReq.seedId);
             const firstStatus = new Status(newTrussReq.startDate, selectedSeed.plantNumber, 1);
             if (selectedSeed.plantNumber > truss.maxHole) {
                 firstStatus.plantNumber = truss.maxHole;
                 SeedService.updateSeedNumber(selectedSeed._id, Number(selectedSeed.plantNumber - truss.maxHole));
+            } else {
+                SeedService.deleteOneSeedById(selectedSeed._id);
             }
             const updateVal = {
                 $set: {

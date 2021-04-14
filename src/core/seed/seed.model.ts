@@ -20,10 +20,10 @@ export interface SeedModel extends PlantInfo {
 }
 
 export class Seed extends PlantInfo {
-    private _id: string;
-    private plantId: ObjectId;
-    private startDate: string;
-    private plantNumber: number;
+    _id: string;
+    plantId: ObjectId;
+    startDate: string;
+    plantNumber: number;
     constructor(seed: SeedModel) {
         super(seed);
         this._id = seed._id;
