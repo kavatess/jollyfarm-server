@@ -23,7 +23,7 @@ PlantRouter.post(REQUEST_URL_HEAD + '/plant/insert', async (req: Request, res: R
     res.send(response);
 });
 
-PlantRouter.post(REQUEST_URL_HEAD + '/plant/delete', async (req: Request, res: Response) => {
+PlantRouter.post(REQUEST_URL_HEAD + '/plant/delete/:id', async (req: Request, res: Response) => {
     const plantObjId: string = req.params.id;
     const response = await PlantService.deleteOnePlantById(plantObjId);
     res.send(response);
