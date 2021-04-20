@@ -1,5 +1,5 @@
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
-import { EmptyTruss, Status, PlantingTruss, Truss, Statistic } from "./truss.model";
+import { EmptyTruss, Status, PlantingTruss, Truss, Statistics } from "./truss.model";
 import { CreateTrussRequest, NewStatusRequest, RevertTrussRequest, UpdateMaxHoleRequest } from "./truss.request.model";
 import { MAIN_DATABASE, TRUSS_COLLECTION } from "../../server-constants";
 import { HistoryModel } from "../history/history.model";
@@ -202,19 +202,29 @@ class TrussService {
         return "Client Error";
     }
 
-    async getStatistics() {
+    async getStatistics(reqQuery: any) {
         await TrussService.initializeTrussData();
-        var statistics: Statistic[] = [];
-        TrussService.trussData.forEach((truss) => {
-            if (truss.plantId) {
-                const statIndex = statistics.findIndex(stat => stat.plantName == truss.plantName);
-                if (statIndex >= 0) {
-                    statistics[statIndex].plantNumber += truss.latestPlantNumber;
-                } else {
-                    const stat: Statistic = {
-                        plantName: truss.plantName,
-                        plantColor: truss.plantColor,
-                        plantNumber: truss.latestPlantNumber
+        const trussArrByBlock = reqQuery.block ? TrussService.trussData.filter(({ block }) => block == reqQuery.block) : TrussService.trussData;
+        const trussArrByPlantGrowth = reqQuery.plantGrowth ? trussArrByBlock.filter(({ latestPlantGrowth }) => latestPlantGrowth == Number(reqQuery.plantGrowth)) : trussArrByBlock;
+        const trussArrByPlantId = reqQuery.plantId ? trussArrByPlantGrowth.filter(({ plantId }) => plantId == reqQuery.plantId) : trussArrByPlantGrowth;
+        const resultStats = this.getDiscreteStats(trussArrByPlantId);
+        return resultStats;
+    }
+
+    private getDiscreteStats(trussArrByBlock: Truss[]): Statistics[] {
+        let statistics: Statistics[] = [];
+        trussArrByBlock.forEach(({ plantId, plantName, plantColor, latestPlantNumber }) => {
+            if (plantId) {
+                console.log(statistics);
+                const statIndex = statistics.findIndex(stat => stat.plantName == plantName);
+                if (statIndex > -1) {
+                    statistics[statIndex].plantNumber += latestPlantNumber;
+                }
+                else {
+                    const stat: Statistics = {
+                        plantName: plantName,
+                        plantColor: plantColor,
+                        plantNumber: latestPlantNumber
                     }
                     statistics.push(stat);
                 }

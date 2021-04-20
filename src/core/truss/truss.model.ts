@@ -117,8 +117,13 @@ export class PlantingTrussInfo extends TrussBasicInfo {
     }
 }
 
-export interface Statistic {
+export class Statistics {
     plantName: string;
     plantColor: string;
     plantNumber: number;
+    constructor(plantName: string, plantColor: string, plantNumber: number) {
+        this.plantName = plantName;
+        this.plantColor = plantColor;
+        this.plantNumber = plantNumber;
+    }
 }
