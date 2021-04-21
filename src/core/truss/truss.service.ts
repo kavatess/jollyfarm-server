@@ -205,17 +205,16 @@ class TrussService {
     async getStatistics(reqQuery: any) {
         await TrussService.initializeTrussData();
         const trussArrByBlock = reqQuery.block ? TrussService.trussData.filter(({ block }) => block == reqQuery.block) : TrussService.trussData;
-        const trussArrByPlantGrowth = reqQuery.plantGrowth ? trussArrByBlock.filter(({ latestPlantGrowth }) => latestPlantGrowth == Number(reqQuery.plantGrowth)) : trussArrByBlock;
+        const trussArrByPlantGrowth = Number(reqQuery.plantGrowth) ? trussArrByBlock.filter(({ latestPlantGrowth }) => latestPlantGrowth == Number(reqQuery.plantGrowth)) : trussArrByBlock;
         const trussArrByPlantId = reqQuery.plantId ? trussArrByPlantGrowth.filter(({ plantId }) => plantId == reqQuery.plantId) : trussArrByPlantGrowth;
         const resultStats = this.getDiscreteStats(trussArrByPlantId);
         return resultStats;
     }
 
     private getDiscreteStats(trussArrByBlock: Truss[]): Statistics[] {
-        let statistics: Statistics[] = [];
+        var statistics: Statistics[] = [];
         trussArrByBlock.forEach(({ plantId, plantName, plantColor, latestPlantNumber }) => {
             if (plantId) {
-                console.log(statistics);
                 const statIndex = statistics.findIndex(stat => stat.plantName == plantName);
                 if (statIndex > -1) {
                     statistics[statIndex].plantNumber += latestPlantNumber;
