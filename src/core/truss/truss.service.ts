@@ -204,7 +204,7 @@ class TrussService {
 
     async getStatistics(reqQuery: any) {
         await TrussService.initializeTrussData();
-        const trussArrByBlock = reqQuery.block ? TrussService.trussData.filter(({ block }) => block == reqQuery.block) : TrussService.trussData;
+        const trussArrByBlock = reqQuery.block ? TrussService.trussData.filter(({ block }) => block[0] == reqQuery.block) : TrussService.trussData;
         const trussArrByPlantGrowth = Number(reqQuery.plantGrowth) ? trussArrByBlock.filter(({ latestPlantGrowth }) => latestPlantGrowth == Number(reqQuery.plantGrowth)) : trussArrByBlock;
         const trussArrByPlantId = reqQuery.plantId ? trussArrByPlantGrowth.filter(({ plantId }) => plantId == reqQuery.plantId) : trussArrByPlantGrowth;
         const resultStats = this.getDiscreteStats(trussArrByPlantId);
