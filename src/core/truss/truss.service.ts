@@ -220,11 +220,7 @@ class TrussService {
                     statistics[statIndex].plantNumber += latestPlantNumber;
                 }
                 else {
-                    const stat: Statistics = {
-                        plantName: plantName,
-                        plantColor: plantColor,
-                        plantNumber: latestPlantNumber
-                    }
+                    const stat: Statistics = new Statistics(plantName, plantColor, latestPlantNumber);
                     statistics.push(stat);
                 }
             }
