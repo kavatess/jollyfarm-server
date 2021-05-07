@@ -27,6 +27,7 @@ class PlantService {
         const updateVal = {
             $set: {
                 plantName: updatedObj.plantName,
+                imgSrc: updatedObj.imgSrc,
                 plantColor: updatedObj.plantColor,
                 growUpTime: updatedObj.growUpTime,
                 mediumGrowthTime: updatedObj.mediumGrowthTime,
