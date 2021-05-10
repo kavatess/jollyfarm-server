@@ -75,7 +75,7 @@ export class EmptyTruss extends Truss {
     }
 }
 
-export class TrussBasicInfo {
+class TrussBasicInfo {
     _id: string;
     block: string;
     index: number;
@@ -90,7 +90,7 @@ export class TrussBasicInfo {
     }
 }
 
-export class PlantingTrussInfo extends TrussBasicInfo {
+class PlantingTrussInfo extends TrussBasicInfo {
     startDate: string;
     plantNumber: number;
     plantGrowth: number;

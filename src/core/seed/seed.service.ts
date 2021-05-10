@@ -53,7 +53,7 @@ class SeedService {
     }
 
     async getSeedInfo(seedId: string): Promise<SeedModel> {
-        return await SeedCollection.getDocumentById(seedId);
+        return await SeedCollection.findOneById(seedId);
     }
 }
 

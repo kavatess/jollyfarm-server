@@ -1,13 +1,15 @@
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
 import { EmptyTruss, Status, PlantingTruss, Truss, Statistics } from "./truss.model";
 import { CreateTrussRequest, NewStatusRequest, RevertTrussRequest, UpdateMaxHoleRequest } from "./truss.request.model";
-import { MAIN_DATABASE, TRUSS_COLLECTION } from "../../server-constants";
+import { HISTORY_COLLECTION, MAIN_DATABASE, TRUSS_COLLECTION } from "../../server-constants";
 import { HistoryModel } from "../history/history.model";
 import HistoryService from '../history/history.service';
 import SeedService from '../seed/seed.service';
 import { SeedModel } from "../seed/seed.model";
+import { ObjectId } from "bson";
 
 const TrussCollection = new MongoDB_Collection(MAIN_DATABASE, TRUSS_COLLECTION);
+const HistoryCollection = new MongoDB_Collection(MAIN_DATABASE, HISTORY_COLLECTION);
 
 class TrussService {
     private static trussData: Truss[] = [];
@@ -104,20 +106,20 @@ class TrussService {
         return trussArr;
     }
 
-    async updateTrussStatus(newStatusRequest: NewStatusRequest) {
+    async updateTrussStatus({ _id, date, plantNumber, plantGrowth }: NewStatusRequest) {
         await TrussService.initializeTrussData();
-        const updatedTruss: Truss = TrussService.trussData.find(truss => truss._id == newStatusRequest._id)!;
+        const updatedTruss: Truss = TrussService.trussData.find(truss => truss._id == _id)!;
         // Compare valid new plant growth and plant number
-        const newPlantGrowthCond = updatedTruss.latestPlantGrowth <= newStatusRequest.plantGrowth;
-        const newPlantNumberCond = updatedTruss.latestPlantNumber >= newStatusRequest.plantNumber;
-        const exceptCond = updatedTruss.latestPlantGrowth == newStatusRequest.plantGrowth && updatedTruss.latestPlantNumber == newStatusRequest.plantNumber;
+        const newPlantGrowthCond = updatedTruss.latestPlantGrowth <= plantGrowth;
+        const newPlantNumberCond = updatedTruss.latestPlantNumber >= plantNumber;
+        const exceptCond = updatedTruss.latestPlantGrowth == plantGrowth && updatedTruss.latestPlantNumber == plantNumber;
         if (newPlantGrowthCond && newPlantNumberCond && !exceptCond) {
-            const newStatus: Status = new Status(newStatusRequest.date, newStatusRequest.plantNumber, newStatusRequest.plantGrowth);
+            const newStatus: Status = new Status(date, plantNumber, plantGrowth);
             const updateVal = { $push: { realStatus: newStatus } };
-            await TrussCollection.updateOne(newStatusRequest._id, updateVal);
+            await TrussCollection.updateOne(_id, updateVal);
             // If update plant number is zero, we also clear the truss
             if (!newStatus.plantNumber) {
-                return await this.clearTruss(newStatusRequest._id);
+                return await this.clearTruss(_id);
             }
             return await TrussService.resetTrussData();
         }
@@ -226,6 +228,10 @@ class TrussService {
             }
         });
         return statistics;
+    }
+
+    async getTrussHistory(trussId: string) {
+        return await HistoryCollection.findAllWithCond({ trussId: new ObjectId(trussId) });
     }
 }
 

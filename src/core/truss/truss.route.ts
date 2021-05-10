@@ -48,8 +48,8 @@ TrussRouter.post(REQUEST_URL_HEAD + '/truss/revert/status', async (req: Request,
     res.json(response);
 });
 
-// TrussRouter.post(REQUEST_URL_HEAD + '/truss/timeline/:id', async (req: Request, res: Response) => {
-//     const trussId = req.params.id;
-//     const response = await TrussService.getTimeLineData(trussId);
-//     res.json(response);
-// });
+TrussRouter.post(REQUEST_URL_HEAD + '/truss/history/:id', async (req: Request, res: Response) => {
+    const trussId = req.params.id;
+    const response = await TrussService.getTrussHistory(trussId);
+    res.json(response);
+});

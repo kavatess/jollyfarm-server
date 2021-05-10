@@ -16,7 +16,7 @@ export class MongoDB_Collection {
         return this.collection;
     }
 
-    async getDocumentById(id: string) {
+    async findOneById(id: string) {
         try {
             await this.getCollection();
             const findCond = { _id: new ObjectId(id) };
@@ -27,7 +27,7 @@ export class MongoDB_Collection {
         }
     }
 
-    async getDocumentWithCond(findCond = {}): Promise<any[]> {
+    async findAllWithCond(findCond = {}): Promise<any[]> {
         try {
             await this.getCollection();
             return await this.collection.find(findCond).toArray();
@@ -102,10 +102,19 @@ export class MongoDB_Collection {
         }
     }
 
-    async joinWithPlantData(): Promise<any[]> {
+    async joinTwoCollection(lookUpMethod: any): Promise<any[]> {
         try {
             await this.getCollection();
-            const aggregateMethod = [{
+            return await this.collection.aggregate(lookUpMethod).toArray();
+        } catch (err) {
+            console.log(err);
+            return [];
+        }
+    }
+
+    async joinWithPlantData(): Promise<any[]> {
+        const aggregateMethod = [
+            {
                 $lookup: {
                     from: "plant",
                     localField: "plantId",
@@ -116,11 +125,10 @@ export class MongoDB_Collection {
             {
                 $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$fromItems", 0] }, "$$ROOT"] } }
             },
-            { $project: { fromItems: 0 } }]
-            return await this.collection.aggregate(aggregateMethod).toArray();
-        } catch (err) {
-            console.log(err);
-            return [];
-        }
+            {
+                $project: { fromItems: 0 }
+            }
+        ];
+        return await this.joinTwoCollection(aggregateMethod);
     }
 }

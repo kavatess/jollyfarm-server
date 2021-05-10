@@ -13,7 +13,7 @@ class PlantService {
 
     async getPlantData() {
         if (!PlantService.plantData.length) {
-            PlantService.plantData = await PlantCollection.getDocumentWithCond();
+            PlantService.plantData = await PlantCollection.findAllWithCond();
         }
         return PlantService.plantData;
     }
@@ -43,7 +43,7 @@ class PlantService {
     }
 
     async getPlantInfo(plantId: string) {
-        return await PlantCollection.getDocumentById(plantId);
+        return await PlantCollection.findOneById(plantId);
     }
 
     async insertOnePlant(newPlant: PlantModel) {
