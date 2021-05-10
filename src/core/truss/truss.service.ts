@@ -231,7 +231,26 @@ class TrussService {
     }
 
     async getTrussHistory(trussId: string) {
-        return await HistoryCollection.findAllWithCond({ trussId: new ObjectId(trussId) });
+        const aggregateMethod = [
+            {
+                $match: { trussId: new ObjectId(trussId) }
+            },
+            {
+                $lookup: {
+                    from: "plant",
+                    localField: "plantId",
+                    foreignField: "_id",
+                    as: "fromItems"
+                }
+            },
+            {
+                $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$fromItems", 0] }, "$$ROOT"] } }
+            },
+            {
+                $project: { fromItems: 0 }
+            }
+        ];
+        return await HistoryCollection.aggregateData(aggregateMethod);
     }
 }
 

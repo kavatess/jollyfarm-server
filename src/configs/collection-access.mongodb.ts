@@ -102,7 +102,7 @@ export class MongoDB_Collection {
         }
     }
 
-    async joinTwoCollection(lookUpMethod: any): Promise<any[]> {
+    async aggregateData(lookUpMethod: any): Promise<any[]> {
         try {
             await this.getCollection();
             return await this.collection.aggregate(lookUpMethod).toArray();
@@ -129,6 +129,6 @@ export class MongoDB_Collection {
                 $project: { fromItems: 0 }
             }
         ];
-        return await this.joinTwoCollection(aggregateMethod);
+        return await this.aggregateData(aggregateMethod);
     }
 }
