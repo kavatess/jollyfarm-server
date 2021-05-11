@@ -39,7 +39,7 @@ class TrussService {
         return await TrussService.initializeTrussData();
     }
 
-    async getTrussArrByBlock(block: string = "all"): Promise<Truss[]> {
+    async getTrussDataByBlock(block: string = "all"): Promise<Truss[]> {
         await TrussService.initializeTrussData();
         const trussData = TrussService.trussData.map(truss => truss.getBasicTrussInfo());
         if (block == "all") {
@@ -104,6 +104,29 @@ class TrussService {
         trussArr.sort((a, b) => a.index - b.index);
         trussArr.splice(1, 0, null, null);
         return trussArr;
+    }
+
+    async getRawTrussDataByBlock(block: string) {
+        const aggregateMethod = [
+            {
+                $match: { block: block }
+            },
+            {
+                $lookup: {
+                    from: "plant",
+                    localField: "plantId",
+                    foreignField: "_id",
+                    as: "fromItems"
+                }
+            },
+            {
+                $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$fromItems", 0] }, "$$ROOT"] } }
+            },
+            {
+                $project: { fromItems: 0 }
+            }
+        ];
+        return await TrussCollection.aggregateData(aggregateMethod);
     }
 
     async updateTrussStatus({ _id, date, plantNumber, plantGrowth }: NewStatusRequest) {

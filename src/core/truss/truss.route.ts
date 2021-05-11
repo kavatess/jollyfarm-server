@@ -8,7 +8,13 @@ export const TrussRouter: Router = express.Router();
 
 TrussRouter.post(REQUEST_URL_HEAD + '/truss/block/:block', async (req: Request, res: Response) => {
     const block = req.params.block;
-    const trussArr = await TrussService.getTrussArrByBlock(block);
+    const trussArr = await TrussService.getTrussDataByBlock(block);
+    res.json(trussArr);
+});
+
+TrussRouter.post(REQUEST_URL_HEAD + '/truss/raw/:block', async (req: Request, res: Response) => {
+    const block = req.params.block;
+    const trussArr = await TrussService.getRawTrussDataByBlock(block);
     res.json(trussArr);
 });
 
