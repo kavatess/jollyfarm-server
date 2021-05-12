@@ -210,7 +210,7 @@ class TrussService {
             return "Client Error";
         }
 
-        if (revertReq.statusIndex > 0) {
+        if (revertReq.statusIndex >= 0 && truss.realStatus.length > 1) {
             const updateVal = {
                 $push: {
                     realStatus: {
