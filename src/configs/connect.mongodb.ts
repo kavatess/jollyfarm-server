@@ -2,10 +2,10 @@ import mongodb, { Db, MongoClient } from "mongodb";
 import { DB_CONNECT_OPTIONS, DB_URI } from "../server-constants";
 
 export class MongoDatabase {
-    private static mongodb: MongoClient;
+    private static mongoDB: MongoClient;
     private constructor() {
+        MongoDatabase.dbConnection();
     }
-
     private static async connect() {
         try {
             return await mongodb.connect(DB_URI, DB_CONNECT_OPTIONS);
@@ -15,12 +15,12 @@ export class MongoDatabase {
         }
     }
     private static async dbConnection() {
-        if (!MongoDatabase.mongodb) {
+        if (!MongoDatabase.mongoDB) {
             console.log(`Establishing database connection...`);
-            MongoDatabase.mongodb = await this.connect();
+            MongoDatabase.mongoDB = await this.connect();
             console.log(`Database connection established successfully.`);
         }
-        return MongoDatabase.mongodb;
+        return MongoDatabase.mongoDB;
     }
     public static async getDatabase(dbName: string): Promise<Db> {
         const mongoDB = await this.dbConnection();

@@ -1,7 +1,7 @@
 import { ObjectId } from "bson";
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
-import { MAIN_DATABASE, SEED_COLLECTION, SEED_STORAGE_COLLECTION, STORAGE_DATABASE } from "../../server-constants";
-import { Seed, SeedModel } from "./seed.model";
+import { MAIN_DATABASE, PLANT_LOOKUP_AGGREGATION, SEED_COLLECTION, SEED_STORAGE_COLLECTION, STORAGE_DATABASE } from "../../server-constants";
+import { BasicSeedModel, Seed, SeedModel } from "./seed.model";
 
 const SeedStorageCollection = new MongoDB_Collection(STORAGE_DATABASE, SEED_STORAGE_COLLECTION);
 const SeedCollection = new MongoDB_Collection(MAIN_DATABASE, SEED_COLLECTION);
@@ -15,8 +15,8 @@ class SeedService {
 
     async getSeedData(): Promise<Seed[]> {
         if (!SeedService.seedData.length) {
-            const seedRawData: SeedModel[] = await SeedCollection.joinWithPlantData();
-            SeedService.seedData = seedRawData.map(seed => new Seed(seed)).sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+            const seedRawData: SeedModel[] = await SeedCollection.aggregate(PLANT_LOOKUP_AGGREGATION);
+            SeedService.seedData = seedRawData.map(seed => new Seed(seed)).sort((a, b) => a.getStartDate().getTime() - b.getStartDate().getTime());
         }
         return SeedService.seedData.map(seed => seed.seedInfo);
     }
@@ -26,10 +26,11 @@ class SeedService {
         return await this.getSeedData();
     }
 
-    async insertManySeed(newSeedArr: SeedModel[]) {
+    async insertManySeed(newSeedArr: BasicSeedModel[]) {
         const newSeedList = newSeedArr.map(seed => {
-            seed.plantId = new ObjectId(seed.plantId);
-            return seed;
+            let seedObj = Object.assign(seed);
+            seedObj._id = new ObjectId(seed.plantId);
+            return seedObj;
         });
         await SeedCollection.insertMany(newSeedList);
         await SeedStorageCollection.insertMany(newSeedList);

@@ -2,9 +2,8 @@ import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
 import { MAIN_DATABASE, PLANT_COLLECTION } from "../../server-constants";
 import { Plant, PlantModel } from "./plant.model";
 
-const PlantCollection = new MongoDB_Collection(MAIN_DATABASE, PLANT_COLLECTION);
-
 class PlantService {
+    plantCollection: MongoDB_Collection = new MongoDB_Collection(MAIN_DATABASE, PLANT_COLLECTION);
     private static plantData: Plant[] = [];
 
     constructor() {
@@ -13,14 +12,14 @@ class PlantService {
 
     async getPlantData() {
         if (!PlantService.plantData.length) {
-            PlantService.plantData = await PlantCollection.findAllWithCond();
+            PlantService.plantData = await this.plantCollection.findAll();
         }
         return PlantService.plantData;
     }
 
     private async resetPlantData() {
         PlantService.plantData = [];
-        return await this.getPlantData();
+        await this.getPlantData();
     }
 
     async updatePlant(updatedObj: PlantModel): Promise<any> {
@@ -38,21 +37,21 @@ class PlantService {
                 wormMonth: updatedObj.wormMonth
             }
         }
-        await PlantCollection.updateOne(updatedObj._id, updateVal);
+        await this.plantCollection.updateOne(updatedObj._id, updateVal);
         return await this.resetPlantData();
     }
 
     async getPlantInfo(plantId: string) {
-        return await PlantCollection.findOneById(plantId);
+        return await this.plantCollection.findOneById(plantId);
     }
 
     async insertOnePlant(newPlant: PlantModel) {
-        await PlantCollection.insertOne(newPlant);
+        await this.plantCollection.insertOne(newPlant);
         return await this.resetPlantData();
     }
 
     async deleteOnePlantById(plantId: string) {
-        await PlantCollection.deleteOneById(plantId);
+        await this.plantCollection.deleteOneById(plantId);
         return await this.resetPlantData();
     }
 }

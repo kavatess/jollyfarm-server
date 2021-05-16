@@ -1,64 +1,64 @@
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
-import { EmptyTruss, Status, PlantingTruss, Truss, Statistics } from "./truss.model";
+import { Status, Truss, Statistics, TrussModel } from "./truss.model";
 import { CreateTrussRequest, NewStatusRequest, RevertTrussRequest, UpdateMaxHoleRequest } from "./truss.request.model";
-import { HISTORY_COLLECTION, MAIN_DATABASE, TRUSS_COLLECTION } from "../../server-constants";
-import { HistoryModel } from "../history/history.model";
+import { HISTORY_COLLECTION, MAIN_DATABASE, PLANT_LOOKUP_AGGREGATION, TRUSS_COLLECTION } from "../../server-constants";
 import HistoryService from '../history/history.service';
 import SeedService from '../seed/seed.service';
 import { SeedModel } from "../seed/seed.model";
 import { ObjectId } from "bson";
+import { BasicTrussFactory } from "./models/basic-truss.factory.model";
+import { BasicHistoryModel } from "../history/history.model";
 
 const TrussCollection = new MongoDB_Collection(MAIN_DATABASE, TRUSS_COLLECTION);
 const HistoryCollection = new MongoDB_Collection(MAIN_DATABASE, HISTORY_COLLECTION);
 
 class TrussService {
-    private static trussData: Truss[] = [];
+    private static trussData: TrussModel[] = [];
 
     constructor() {
-        TrussService.initializeTrussData();
+        TrussService.trussDataInIt();
     }
 
-    private static async initializeTrussData() {
+    private static async trussDataInIt(): Promise<void> {
         // get truss data when empty
         if (!TrussService.trussData.length) {
-            const trussData: Truss[] = await TrussCollection.joinWithPlantData();
-            // create 2 oop truss objs: empty-truss and planting-truss
-            TrussService.trussData = trussData.map(truss => {
-                if (truss.plantId) {
-                    const trussEl = new PlantingTruss(truss);
-                    return trussEl;
-                }
-                return new EmptyTruss(truss);
-            });
+            this.trussData = await TrussCollection.aggregate(PLANT_LOOKUP_AGGREGATION);
         }
-        return TrussService.trussData;
     }
 
-    private static async resetTrussData() {
+    private static async resetTrussData(): Promise<void> {
         TrussService.trussData = [];
-        return await TrussService.initializeTrussData();
+        await TrussService.trussDataInIt();
     }
 
-    async getTrussDataByBlock(block: string = "all"): Promise<Truss[]> {
-        await TrussService.initializeTrussData();
-        const trussData = TrussService.trussData.map(truss => truss.getBasicTrussInfo());
-        if (block == "all") {
-            return trussData;
+    private createTrussById(trussId: string): Truss {
+        const truss = TrussService.trussData.find(({ _id }) => _id == trussId);
+        if (truss) {
+            return new BasicTrussFactory().createTruss(truss);
         }
-        const trussArr = trussData.filter(truss => truss.block == block);
+        throw new Error(`Truss with id: '${trussId}' does not exist!`);
+    }
+
+    private createTrussArr(trussData: TrussModel[]): Truss[] {
+        return trussData.map(truss => {
+            return new BasicTrussFactory().createTruss(truss);
+        });
+    }
+
+    private sortTrussData(block: string, trussData: Truss[]): any[] {
         if (block == "BS") {
-            return this.sortDataInBlockBS(trussArr);
+            return this.sortDataInBlockBS(trussData);
         }
         if (block == "C") {
-            return this.sortDataInBlockC(trussArr);
+            return this.sortDataInBlockC(trussData);
         }
         if (block == "CT") {
-            return this.sortDataInBlockCT(trussArr);
+            return this.sortDataInBlockCT(trussData);
         }
         if (block == "D") {
-            return this.sortDataInBlockD(trussArr);
+            return this.sortDataInBlockD(trussData);
         }
-        return this.sortDataInBlockA_B_BN(trussArr);
+        return this.sortDataInBlockA_B_BN(trussData);
     }
 
     private sortDataInBlockA_B_BN(trussArr: Truss[]): Truss[] {
@@ -106,146 +106,174 @@ class TrussService {
         return trussArr;
     }
 
-    async getRawTrussDataByBlock(block: string) {
-        const aggregateMethod = [
-            {
-                $match: { block: block }
-            },
-            {
-                $lookup: {
-                    from: "plant",
-                    localField: "plantId",
-                    foreignField: "_id",
-                    as: "fromItems"
-                }
-            },
-            {
-                $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$fromItems", 0] }, "$$ROOT"] } }
-            },
-            {
-                $project: { fromItems: 0 }
-            }
-        ];
-        return await TrussCollection.aggregateData(aggregateMethod);
+    async getTrussDataByBlock(block: string = "all"): Promise<Truss[]> {
+        await TrussService.trussDataInIt();
+        if (block == "all") {
+            return this.createTrussArr(TrussService.trussData).map(truss => truss.getBasicTrussInfo());
+        }
+        const trussArr = TrussService.trussData.filter(truss => truss.block == block).map(truss => new BasicTrussFactory().createTruss(truss).getBasicTrussInfo());
+        return this.sortTrussData(block, trussArr).map(truss => truss.getBasicTrussInfo());
+    }
+
+    async getRawTrussDataByBlock(block: string): Promise<TrussModel[]> {
+        const aggregateMethod = [{ $match: { block: block } }, ...PLANT_LOOKUP_AGGREGATION];
+        return await TrussCollection.aggregate(aggregateMethod);
     }
 
     async updateTrussStatus({ _id, date, plantNumber, plantGrowth }: NewStatusRequest) {
-        await TrussService.initializeTrussData();
-        const updatedTruss: Truss = TrussService.trussData.find(truss => truss._id == _id)!;
-        // Compare valid new plant growth and plant number
-        const newPlantGrowthCond = updatedTruss.latestPlantGrowth <= plantGrowth;
-        const newPlantNumberCond = updatedTruss.latestPlantNumber >= plantNumber;
-        const exceptCond = updatedTruss.latestPlantGrowth == plantGrowth && updatedTruss.latestPlantNumber == plantNumber;
-        if (newPlantGrowthCond && newPlantNumberCond && !exceptCond) {
-            const newStatus: Status = new Status(date, plantNumber, plantGrowth);
-            const updateVal = { $push: { realStatus: newStatus } };
-            await TrussCollection.updateOne(_id, updateVal);
-            // If update plant number is zero, we also clear the truss
-            if (!newStatus.plantNumber) {
-                return await this.clearTruss(_id);
+        try {
+            await TrussService.trussDataInIt();
+            const updatedTruss: Truss = this.createTrussById(_id);
+            const newPlantGrowthCond = updatedTruss.latestPlantGrowth <= plantGrowth;
+            const newPlantNumberCond = updatedTruss.latestPlantNumber >= plantNumber;
+            const exceptCond = updatedTruss.latestPlantGrowth == plantGrowth && updatedTruss.latestPlantNumber == plantNumber;
+            if (newPlantGrowthCond && newPlantNumberCond && !exceptCond) {
+                const newStatus: Status = new Status(date, plantNumber, plantGrowth);
+                const updateVal = { $push: { realStatus: newStatus } };
+                await TrussCollection.updateOne(_id, updateVal);
+                // If update plant number is zero, we also clear the truss
+                if (!newStatus.plantNumber) {
+                    return await this.clearTruss(_id);
+                }
+                return await TrussService.resetTrussData();
             }
-            return await TrussService.resetTrussData();
+            throw new Error("Invalid update status request!");
+        } catch (err) {
+            console.log(err);
+            return new Error(err);
         }
-        console.log("Invalid status request.");
     }
 
     async clearTruss(clearedTrussId: string) {
-        await TrussService.initializeTrussData();
-        const clearedTruss: Truss = TrussService.trussData.find(truss => truss._id == clearedTrussId)!;
-        if (clearedTruss.plantId) {
-            // Insert a new History
-            const newHistory = new HistoryModel(clearedTruss._id, clearedTruss.plantId, clearedTruss.startDate, clearedTruss.realStatus);
-            HistoryService.insertOneHistory(newHistory);
-            // Reset truss
-            const updateVal = {
-                $set: {
-                    plantId: '',
-                    startDate: '',
-                    realStatus: []
-                }
-            };
-            await TrussCollection.updateOne(clearedTrussId, updateVal);
-            return await TrussService.resetTrussData();
+        try {
+            await TrussService.trussDataInIt();
+            const clearedTruss: Truss = this.createTrussById(clearedTrussId);
+            if (clearedTruss.plantId) {
+                // Insert a new History
+                const newHistory = new BasicHistoryModel(clearedTrussId, clearedTruss.plantId, clearedTruss.startDate, clearedTruss.realStatus);
+                HistoryService.insertOneHistory(newHistory);
+                // Reset truss
+                const updateVal = {
+                    $set: {
+                        plantId: '',
+                        startDate: '',
+                        realStatus: []
+                    }
+                };
+                await TrussCollection.updateOne(clearedTrussId, updateVal);
+                return await TrussService.resetTrussData();
+            }
+            throw new Error(`Cannot clear truss with ID: "${clearedTrussId}" because it is now empty.`);
+        } catch (err) {
+            console.log(err);
+            return new Error(err);
         }
-        console.log(`Cannot clear truss with ID: "${clearedTrussId}" because it is now empty.`);
     }
 
-    async createNewTruss(newTrussReq: CreateTrussRequest) {
-        await TrussService.initializeTrussData();
-        const truss: Truss = TrussService.trussData.find(truss => truss._id == newTrussReq._id)!;
-        if (!truss.plantId) {
-            const selectedSeed: SeedModel = await SeedService.getSeedInfo(newTrussReq.seedId);
-            const firstStatus = new Status(newTrussReq.startDate, selectedSeed.plantNumber, 1);
-            if (selectedSeed.plantNumber > truss.maxHole) {
-                firstStatus.plantNumber = truss.maxHole;
-                SeedService.updateSeedNumber(selectedSeed._id, Number(selectedSeed.plantNumber - truss.maxHole));
-            } else {
-                SeedService.deleteOneSeedById(selectedSeed._id);
-            }
-            const updateVal = {
-                $set: {
-                    plantId: selectedSeed.plantId,
-                    startDate: newTrussReq.startDate,
-                    realStatus: [firstStatus],
+    async createNewTruss({ _id, startDate, seedId }: CreateTrussRequest) {
+        try {
+            await TrussService.trussDataInIt();
+            const createdTruss: Truss = this.createTrussById(_id);
+            if (!createdTruss.plantId) {
+                const selectedSeed: SeedModel = await SeedService.getSeedInfo(seedId);
+                const firstStatus = new Status(startDate, selectedSeed.plantNumber, 1);
+                if (selectedSeed.plantNumber > createdTruss.maxHole) {
+                    firstStatus.plantNumber = createdTruss.maxHole;
+                    SeedService.updateSeedNumber(selectedSeed._id, Number(selectedSeed.plantNumber - createdTruss.maxHole));
+                } else {
+                    SeedService.deleteOneSeedById(selectedSeed._id);
                 }
-            };
-            await TrussCollection.updateOne(newTrussReq._id, updateVal);
-            return await TrussService.resetTrussData();
+                const updateVal = {
+                    $set: {
+                        plantId: selectedSeed.plantId,
+                        startDate: startDate,
+                        realStatus: [firstStatus],
+                    }
+                };
+                await TrussCollection.updateOne(_id, updateVal);
+                return await TrussService.resetTrussData();
+            }
+            throw new Error(`Cannot create truss with ID: "${_id}" because it is now being planted.`);
+        } catch (err) {
+            console.log(err);
+            return new Error(err);
         }
-        console.log(`Cannot create truss with ID: "${newTrussReq._id}" because it is now being planted.`);
     }
 
     async updateTrussMaxHole(newMaxHole: UpdateMaxHoleRequest) {
-        await TrussService.initializeTrussData();
-        const updateVal = { $set: { maxHole: newMaxHole.maxHole } };
-        await TrussCollection.updateOne(newMaxHole._id, updateVal);
-        return await TrussService.resetTrussData();
-    }
-
-    async revertTrussStatus(revertReq: RevertTrussRequest) {
-        await TrussService.initializeTrussData();
-        const truss = TrussService.trussData.find(truss => truss._id == revertReq._id);
-        if (!truss) {
-            console.log(`There is no ID: "${revertReq._id}" to revert.`);
-            return "Client Error";
-        }
-
-        if (revertReq.statusIndex >= 0 && truss.realStatus.length > 1) {
-            const updateVal = {
-                $push: {
-                    realStatus: {
-                        $each: [],
-                        $slice: revertReq.statusIndex + 1
-                    }
-                }
-            };
-            await TrussCollection.updateOne(revertReq._id, updateVal);
+        try {
+            await TrussService.trussDataInIt();
+            const updateVal = { $set: { maxHole: newMaxHole.maxHole } };
+            await TrussCollection.updateOne(newMaxHole._id, updateVal);
             return await TrussService.resetTrussData();
+        } catch (err) {
+            console.log(err)
+            return new Error(err);
         }
-
-        console.log("Invalid index status to revert.");
-        return "Client Error";
     }
 
-    async getStatistics(reqQuery: any) {
-        await TrussService.initializeTrussData();
-        const trussArrByBlock = reqQuery.block ? TrussService.trussData.filter(({ block }) => block[0] == reqQuery.block) : TrussService.trussData;
-        const trussArrByPlantGrowth = Number(reqQuery.plantGrowth) ? trussArrByBlock.filter(({ latestPlantGrowth }) => latestPlantGrowth == Number(reqQuery.plantGrowth)) : trussArrByBlock;
-        const trussArrByPlantId = reqQuery.plantId ? trussArrByPlantGrowth.filter(({ plantId }) => plantId == reqQuery.plantId) : trussArrByPlantGrowth;
-        const resultStats = this.getDiscreteStats(trussArrByPlantId);
-        return resultStats;
+    async revertTrussStatus({ _id, statusIndex }: RevertTrussRequest) {
+        try {
+            await TrussService.trussDataInIt();
+            const revertedTruss: Truss = this.createTrussById(_id);
+            if (statusIndex >= 0 && revertedTruss.realStatus.length > 1) {
+                const updateVal = {
+                    $push: {
+                        realStatus: {
+                            $each: [],
+                            $slice: statusIndex + 1
+                        }
+                    }
+                };
+                await TrussCollection.updateOne(_id, updateVal);
+                return await TrussService.resetTrussData();
+            }
+            throw new Error("Invalid index status to revert.");
+        } catch (err) {
+            console.log(err)
+            return new Error(err);
+        }
+    }
+
+    async getStatistics({ block, plantGrowth, plantId }: any) {
+        try {
+            await TrussService.trussDataInIt();
+            const trussArr = TrussService.trussData.filter(truss => {
+                let filterCond = true;
+                if (block) {
+                    filterCond &&= (truss.block[0] == block);
+                }
+                if (Number(plantGrowth) > 0) {
+                    const latestPlantGrowth = truss.realStatus[truss.realStatus.length - 1].plantGrowth;
+                    filterCond &&= (latestPlantGrowth == plantGrowth);
+                }
+                if (plantId) {
+                    filterCond &&= (truss.plantId == plantId);
+                }
+                return filterCond;
+            });
+            const resultStats = this.getDiscreteStats(this.createTrussArr(trussArr));
+            return resultStats;
+        } catch (err) {
+            console.log(err)
+            return new Error(err);
+        }
     }
 
     private getDiscreteStats(trussArrByBlock: Truss[]): Statistics[] {
         var statistics: Statistics[] = [];
-        trussArrByBlock.forEach(({ plantId, plantName, plantColor, latestPlantNumber }) => {
+        trussArrByBlock.forEach(({ plantId, plantType, latestPlantNumber }) => {
             if (plantId) {
-                const statIndex = statistics.findIndex(stat => stat.plantName == plantName);
+                const statIndex = statistics.findIndex(stat => stat.plantName == plantType.getPlantName());
                 if (statIndex > -1) {
                     statistics[statIndex].plantNumber += latestPlantNumber;
                 }
                 else {
-                    const stat: Statistics = new Statistics(plantName, plantColor, latestPlantNumber);
+                    const stat: Statistics = {
+                        plantName: plantType.getPlantName(),
+                        plantColor: plantType.getPlantColor(),
+                        plantNumber: latestPlantNumber
+                    }
                     statistics.push(stat);
                 }
             }
@@ -254,26 +282,8 @@ class TrussService {
     }
 
     async getTrussHistory(trussId: string) {
-        const aggregateMethod = [
-            {
-                $match: { trussId: new ObjectId(trussId) }
-            },
-            {
-                $lookup: {
-                    from: "plant",
-                    localField: "plantId",
-                    foreignField: "_id",
-                    as: "fromItems"
-                }
-            },
-            {
-                $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$fromItems", 0] }, "$$ROOT"] } }
-            },
-            {
-                $project: { fromItems: 0 }
-            }
-        ];
-        return await HistoryCollection.aggregateData(aggregateMethod);
+        const aggregateMethod = [{ $match: { trussId: new ObjectId(trussId) } }, ...PLANT_LOOKUP_AGGREGATION]
+        return await HistoryCollection.aggregate(aggregateMethod);
     }
 }
 

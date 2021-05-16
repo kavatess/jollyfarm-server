@@ -5,10 +5,10 @@ export class MongoDB_Collection {
     private collection!: Collection;
 
     constructor(private dbName: string, private colName: string) {
-        this.getCollection();
+        this.collectionInit();
     }
 
-    async getCollection() {
+    public async collectionInit(): Promise<Collection> {
         if (!this.collection) {
             const db: Db = await MongoDatabase.getDatabase(this.dbName);
             this.collection = db.collection(this.colName);
@@ -16,20 +16,20 @@ export class MongoDB_Collection {
         return this.collection;
     }
 
-    async findOneById(id: string) {
+    public async findOneById(id: string) {
         try {
-            await this.getCollection();
+            await this.collectionInit();
             const findCond = { _id: new ObjectId(id) };
             return await this.collection.findOne(findCond);
         } catch (err) {
             console.log(err);
-            return err;
+            return new Error(err);
         }
     }
 
-    async findAllWithCond(findCond = {}): Promise<any[]> {
+    public async findAll(findCond = {}): Promise<any[]> {
         try {
-            await this.getCollection();
+            await this.collectionInit();
             return await this.collection.find(findCond).toArray();
         } catch (err) {
             console.log(err);
@@ -37,98 +37,77 @@ export class MongoDB_Collection {
         }
     }
 
-    async insertOne(obj: any) {
+    public async insertOne(obj: any) {
         try {
-            await this.getCollection();
+            await this.collectionInit();
             return await this.collection.insertOne(obj);
         } catch (err) {
             console.log(err);
-            return err;
+            return new Error(err);
         }
     }
 
-    async insertMany(objArr: any[]) {
+    public async insertMany(objArr: any[]) {
         try {
-            await this.getCollection();
+            await this.collectionInit();
             return await this.collection.insertMany(objArr);
         } catch (err) {
             console.log(err);
-            return err;
+            return new Error(err);
         }
     }
 
-    async deleteOneById(deletedObjId: string) {
+    public async deleteOneById(deletedObjId: string) {
         try {
-            await this.getCollection();
+            await this.collectionInit();
             const deleteCond = { _id: new ObjectId(deletedObjId) };
             console.log(deleteCond);
             return await this.collection.deleteOne(deleteCond);
         } catch (err) {
             console.log(err);
-            return err;
+            return new Error(err);
         }
     }
 
-    async deleteManyByIdArr(deletedObjIdArr: string[]) {
+    public async deleteManyByIdArr(deletedObjIdArr: string[]) {
         try {
-            await this.getCollection();
+            await this.collectionInit();
             const deletedIdArr = deletedObjIdArr.map(id => new ObjectId(id));
             const deleteCond = { _id: { $in: deletedIdArr } };
             return await this.collection.deleteMany(deleteCond);
         } catch (err) {
             console.log(err);
-            return err;
+            return new Error(err);
         }
     }
 
-    async updateOne(updatedObjId: string, updateVal: any) {
+    public async updateOneById(updatedObjId: string, updateVal: any) {
         try {
-            await this.getCollection();
             const findCond = { _id: new ObjectId(updatedObjId) };
-            return await this.collection.updateOne(findCond, updateVal);
+            return await this.updateOne(findCond, updateVal);
         } catch (err) {
             console.log(err);
-            return err;
+            return new Error(err);
         }
     }
 
-    async updateOneWithHardCond(condObj: any, updateObj: any) {
+    public async updateOne(condObj: any, updateObj: any) {
         try {
-            await this.getCollection();
+            await this.collectionInit();
             return await this.collection.updateOne(condObj, updateObj);
         } catch (err) {
             console.log(err);
-            return err;
+            return new Error(err);
         }
     }
 
-    async aggregateData(lookUpMethod: any): Promise<any[]> {
+    public async aggregate(lookUpMethod: any): Promise<any[]> {
         try {
-            await this.getCollection();
+            await this.collectionInit();
             return await this.collection.aggregate(lookUpMethod).toArray();
         } catch (err) {
             console.log(err);
             return [];
         }
-    }
-
-    async joinWithPlantData(): Promise<any[]> {
-        const aggregateMethod = [
-            {
-                $lookup: {
-                    from: "plant",
-                    localField: "plantId",
-                    foreignField: "_id",
-                    as: "fromItems"
-                }
-            },
-            {
-                $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$fromItems", 0] }, "$$ROOT"] } }
-            },
-            {
-                $project: { fromItems: 0 }
-            }
-        ];
-        return await this.aggregateData(aggregateMethod);
     }
 }

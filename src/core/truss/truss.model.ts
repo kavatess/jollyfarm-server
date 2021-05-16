@@ -1,6 +1,5 @@
-import { floor } from "mathjs";
 import { getDate, addDate } from "../../server-constants";
-import { PlantInfo } from "../plant/plant.model";
+import { Plant, PlantModel } from "../plant/plant.model";
 
 export class Status {
     date: string;
@@ -13,7 +12,18 @@ export class Status {
     }
 }
 
-export abstract class Truss extends PlantInfo {
+export interface TrussModel {
+    _id: string;
+    block: string;
+    index: number;
+    maxHole: number;
+    plantId: string;
+    startDate: string;
+    realStatus: Status[];
+    plantType: PlantModel;
+}
+
+export abstract class Truss {
     _id: string = '';
     block: string = '';
     index: number = 0;
@@ -21,8 +31,8 @@ export abstract class Truss extends PlantInfo {
     plantId: string = '';
     startDate: string = '';
     realStatus: Status[] = [];
-    constructor(truss: Truss) {
-        super(truss);
+    plantType!: Plant;
+    constructor(truss: TrussModel) {
         this._id = truss._id;
         this.block = truss.block;
         this.index = Number(truss.index);
@@ -30,6 +40,7 @@ export abstract class Truss extends PlantInfo {
         this.plantId = truss.plantId;
         this.startDate = getDate(truss.startDate);
         this.realStatus = truss.realStatus.map(sta => new Status(sta.date, sta.plantNumber, sta.plantGrowth));
+        this.plantType = new Plant(truss.plantType);
     }
     get isEmptyTruss(): boolean {
         return !this.plantId && !this.startDate && !this.realStatus.length;
@@ -48,16 +59,16 @@ export abstract class Truss extends PlantInfo {
 
 export class PlantingTruss extends Truss {
 
-    constructor(extendedTruss: Truss) {
-        super(extendedTruss);
+    constructor(plantingTruss: TrussModel) {
+        super(plantingTruss);
     }
     getPredictHarvestDate(): string {
         const isHarvestTruss = this.realStatus.find(sta => sta.plantGrowth == 3);
-        return isHarvestTruss ? isHarvestTruss.date : addDate(this.startDate, this.growUpTime);
+        return isHarvestTruss ? isHarvestTruss.date : addDate(this.startDate, this.plantType.getGrowUpTime());
     }
     getMediumHarvestDate(): string {
         const isMediumTruss = this.realStatus.find(sta => sta.plantGrowth == 2);
-        return isMediumTruss ? isMediumTruss.date : addDate(this.startDate, this.mediumGrowthTime);
+        return isMediumTruss ? isMediumTruss.date : addDate(this.startDate, this.plantType.getMediumGrowthTime());
     }
     getBasicTrussInfo(): PlantingTrussInfo {
         return new PlantingTrussInfo(this);
@@ -66,7 +77,7 @@ export class PlantingTruss extends Truss {
 
 export class EmptyTruss extends Truss {
 
-    constructor(emptyTruss: Truss) {
+    constructor(emptyTruss: TrussModel) {
         super(emptyTruss);
     }
 
@@ -96,7 +107,6 @@ class PlantingTrussInfo extends TrussBasicInfo {
     plantGrowth: number;
     harvestDate: string;
     mediumGrowthDate: string;
-    percentage: number;
     // Plant info
     plantName: string;
     imgSrc: string;
@@ -109,21 +119,15 @@ class PlantingTrussInfo extends TrussBasicInfo {
         this.plantGrowth = truss.latestPlantGrowth;
         this.harvestDate = truss.getPredictHarvestDate();
         this.mediumGrowthDate = truss.getMediumHarvestDate();
-        this.percentage = floor(truss.latestPlantNumber / this.maxHole * 100);
-        this.plantName = truss.plantName;
-        this.imgSrc = truss.imgSrc;
-        this.plantColor = truss.plantColor;
-        this.numberPerKg = truss.numberPerKg;
+        this.plantName = truss.plantType.getPlantName();
+        this.imgSrc = truss.plantType.getImgSrc();
+        this.plantColor = truss.plantType.getPlantColor();
+        this.numberPerKg = truss.plantType.getNumberPerKg();
     }
 }
 
-export class Statistics {
+export interface Statistics {
     plantName: string;
     plantColor: string;
     plantNumber: number;
-    constructor(plantName: string, plantColor: string, plantNumber: number) {
-        this.plantName = plantName;
-        this.plantColor = plantColor;
-        this.plantNumber = plantNumber;
-    }
 }

@@ -1,5 +1,8 @@
-export interface PlantModel {
+export interface PlantModel extends BasicPlantModel {
     _id: string;
+}
+
+export interface BasicPlantModel {
     plantName: string;
     imgSrc: string;
     plantColor: string;
@@ -12,48 +15,63 @@ export interface PlantModel {
     wormMonth: string;
 }
 
-export class PlantInfo {
-    plantName: string;
-    imgSrc: string;
-    plantColor: string;
-    growUpTime: number;
-    mediumGrowthTime: number;
-    seedUpTime: number;
-    numberPerKg: number;
-    alivePercent: number;
-    worm: string;
-    wormMonth: string;
-    constructor(plant: PlantInfo) {
+export class Plant {
+    private _id: string;
+    private plantName: string;
+    private imgSrc: string;
+    private plantColor: string;
+    private growUpTime: number;
+    private mediumGrowthTime: number;
+    private seedUpTime: number;
+    private numberPerKg: number;
+    private alivePercent: number;
+    private worm: string;
+    private wormMonth: string;
+    constructor(plant: PlantModel) {
+        this._id = plant._id;
         this.plantName = plant.plantName;
         this.imgSrc = plant.imgSrc;
         this.plantColor = plant.plantColor;
-        this.growUpTime = plant.growUpTime;
-        this.mediumGrowthTime = plant.mediumGrowthTime;
-        this.seedUpTime = plant.seedUpTime;
-        this.numberPerKg = plant.numberPerKg;
-        this.alivePercent = plant.alivePercent;
+        this.growUpTime = Number(plant.growUpTime);
+        this.mediumGrowthTime = Number(plant.mediumGrowthTime);
+        this.seedUpTime = Number(plant.seedUpTime);
+        this.numberPerKg = Number(plant.numberPerKg);
+        this.alivePercent = Number(plant.alivePercent);
         this.worm = plant.worm;
         this.wormMonth = plant.wormMonth;
     }
-}
-
-export interface PlantBuilder {
-    setPlantName(plantName: string): void;
-    setImgSrc(imgSrc: string): void;
-    setPlantColor(plantColor: string): void;
-    setGrowUpTime(growUpTime: number): void;
-    setMediumGrowthTime(mediumGrowthTime: number): void;
-    setSeedUpTime(seedUpTime: number): void;
-    setNumberPerKg(numberPerKg: number): void;
-    setWorm(worm: string): void;
-    setWormMonths(months: string): void;
-}
-
-export class Plant extends PlantInfo implements PlantBuilder {
-    private _id: string;
-    constructor(plant: Plant) {
-        super(plant);
-        this._id = plant._id;
+    getPlantId(): string {
+        return this._id;
+    }
+    getPlantName(): string {
+        return this.plantName;
+    }
+    getPlantColor(): string {
+        return this.plantColor;
+    }
+    getImgSrc(): string {
+        return this.imgSrc;
+    }
+    getGrowUpTime(): number {
+        return this.growUpTime;
+    }
+    getMediumGrowthTime(): number {
+        return this.mediumGrowthTime;
+    }
+    getSeedUpTime(): number {
+        return this.seedUpTime;
+    }
+    getNumberPerKg(): number {
+        return this.numberPerKg;
+    }
+    getAlivePercent(): number {
+        return this.alivePercent;
+    }
+    getWormInfo(): string {
+        return this.worm;
+    }
+    getWormMonth(): string {
+        return this.wormMonth;
     }
     setPlantName(plantName: string): void {
         this.plantName = plantName;
