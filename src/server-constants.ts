@@ -40,13 +40,3 @@ export const PLANT_LOOKUP_AGGREGATION = [
         $project: { fromItems: 0 }
     }
 ];
-
-export function getDate(dateStr: string): string {
-    const date = new Date(dateStr).toString();
-    return (date === 'Invalid Date') ? dateStr : date;
-}
-
-export function addDate(startDateStr: string, days: number): string {
-    const startDate = new Date(startDateStr).getTime();
-    return new Date(startDate + days * 24 * 3600 * 1000).toString();
-}

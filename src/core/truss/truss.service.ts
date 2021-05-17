@@ -1,19 +1,19 @@
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
-import { Status, Truss, Statistics, TrussModel } from "./truss.model";
+import { Status, Truss, RawTrussModel, TrussBasicInfo, TrussFactory, Statistic } from "./truss.model";
 import { CreateTrussRequest, NewStatusRequest, RevertTrussRequest, UpdateMaxHoleRequest } from "./truss.request.model";
-import { HISTORY_COLLECTION, MAIN_DATABASE, PLANT_LOOKUP_AGGREGATION, TRUSS_COLLECTION } from "../../server-constants";
+import { HISTORY_COLLECTION, MAIN_DATABASE, PLANT_LOOKUP_AGGREGATION, PLANT_MERGE_LOOKUP_AGGREGATION, TRUSS_COLLECTION } from "../../server-constants";
 import HistoryService from '../history/history.service';
 import SeedService from '../seed/seed.service';
 import { SeedModel } from "../seed/seed.model";
 import { ObjectId } from "bson";
-import { BasicTrussFactory } from "./models/basic-truss.factory.model";
 import { BasicHistoryModel } from "../history/history.model";
 
 const TrussCollection = new MongoDB_Collection(MAIN_DATABASE, TRUSS_COLLECTION);
 const HistoryCollection = new MongoDB_Collection(MAIN_DATABASE, HISTORY_COLLECTION);
 
 class TrussService {
-    private static trussData: TrussModel[] = [];
+    private static rawTrussData: RawTrussModel[] = [];
+    private static trussData: Truss[] = [];
 
     constructor() {
         TrussService.trussDataInIt();
@@ -22,8 +22,17 @@ class TrussService {
     private static async trussDataInIt(): Promise<void> {
         // get truss data when empty
         if (!TrussService.trussData.length) {
-            this.trussData = await TrussCollection.aggregate(PLANT_LOOKUP_AGGREGATION);
+            TrussService.rawTrussData = await TrussCollection.aggregate(PLANT_LOOKUP_AGGREGATION);
+            TrussService.trussData = TrussService.rawTrussData.map(truss => new TrussFactory().createTruss(truss));
         }
+    }
+
+    private findTruss(trussId: string): Truss {
+        const truss = TrussService.trussData.find(truss => truss.getTrussId() == trussId);
+        if (truss) {
+            return truss;
+        }
+        throw new Error(`Truss with id: '${trussId}' does not exist!`);
     }
 
     private static async resetTrussData(): Promise<void> {
@@ -31,21 +40,7 @@ class TrussService {
         await TrussService.trussDataInIt();
     }
 
-    private createTrussById(trussId: string): Truss {
-        const truss = TrussService.trussData.find(({ _id }) => _id == trussId);
-        if (truss) {
-            return new BasicTrussFactory().createTruss(truss);
-        }
-        throw new Error(`Truss with id: '${trussId}' does not exist!`);
-    }
-
-    private createTrussArr(trussData: TrussModel[]): Truss[] {
-        return trussData.map(truss => {
-            return new BasicTrussFactory().createTruss(truss);
-        });
-    }
-
-    private sortTrussData(block: string, trussData: Truss[]): any[] {
+    private sortTrussData(block: string, trussData: TrussBasicInfo[]): any[] {
         if (block == "BS") {
             return this.sortDataInBlockBS(trussData);
         }
@@ -61,26 +56,26 @@ class TrussService {
         return this.sortDataInBlockA_B_BN(trussData);
     }
 
-    private sortDataInBlockA_B_BN(trussArr: Truss[]): Truss[] {
+    private sortDataInBlockA_B_BN(trussArr: TrussBasicInfo[]): any[] {
         return trussArr.sort((a, b) => b.index - a.index);
     }
 
-    private sortDataInBlockBS(trussArr: any[]): Truss[] {
+    private sortDataInBlockBS(trussArr: any[]): any[] {
         trussArr.sort((a, b) => b.index - a.index);
         trussArr.splice(1, 0, null, null);
         return trussArr;
     }
 
-    private sortDataInBlockC(trussArr: Truss[]): Truss[] {
+    private sortDataInBlockC(trussArr: TrussBasicInfo[]): TrussBasicInfo[] {
         trussArr.sort((a, b) => a.index - b.index);
         for (var index = 0; index < trussArr.length; index++) {
             if (index < 4) {
-                const temp1: Truss = trussArr[index];
+                const temp1 = trussArr[index];
                 trussArr[index] = trussArr[12 + index];
                 trussArr[12 + index] = temp1;
             }
             if (index > 3 && index < 8) {
-                const temp2: Truss = trussArr[index];
+                const temp2 = trussArr[index];
                 trussArr[index] = trussArr[4 + index];
                 trussArr[4 + index] = temp2;
             }
@@ -88,11 +83,11 @@ class TrussService {
         return trussArr;
     }
 
-    private sortDataInBlockCT(trussArr: Truss[]): Truss[] {
+    private sortDataInBlockCT(trussArr: TrussBasicInfo[]): TrussBasicInfo[] {
         trussArr.sort((a, b) => a.index - b.index);
         for (var index = 0; index < 4; index++) {
             if (index < 4) {
-                const temp1: Truss = trussArr[index];
+                const temp1 = trussArr[index];
                 trussArr[index] = trussArr[8 + index];
                 trussArr[8 + index] = temp1;
             }
@@ -100,7 +95,7 @@ class TrussService {
         return trussArr;
     }
 
-    private sortDataInBlockD(trussArr: any[]): Truss[] {
+    private sortDataInBlockD(trussArr: any[]): TrussBasicInfo[] {
         trussArr.sort((a, b) => a.index - b.index);
         trussArr.splice(1, 0, null, null);
         return trussArr;
@@ -109,26 +104,26 @@ class TrussService {
     async getTrussDataByBlock(block: string = "all"): Promise<Truss[]> {
         await TrussService.trussDataInIt();
         if (block == "all") {
-            return this.createTrussArr(TrussService.trussData).map(truss => truss.getBasicTrussInfo());
+            return TrussService.trussData.map(truss => truss.getBasicTrussInfo());
         }
-        const trussArr = TrussService.trussData.filter(truss => truss.block == block).map(truss => new BasicTrussFactory().createTruss(truss).getBasicTrussInfo());
-        return this.sortTrussData(block, trussArr).map(truss => truss.getBasicTrussInfo());
+        const trussArr = TrussService.trussData.filter(truss => truss.getBlock() == block).map(truss => truss.getBasicTrussInfo());
+        return this.sortTrussData(block, trussArr);
     }
 
-    async getRawTrussDataByBlock(block: string): Promise<TrussModel[]> {
-        const aggregateMethod = [{ $match: { block: block } }, ...PLANT_LOOKUP_AGGREGATION];
-        return await TrussCollection.aggregate(aggregateMethod);
+    async getRawTrussDataByBlock(block: string): Promise<RawTrussModel[]> {
+        await TrussService.trussDataInIt();
+        return TrussService.rawTrussData.filter(truss => truss.block == block);
     }
 
     async updateTrussStatus({ _id, date, plantNumber, plantGrowth }: NewStatusRequest) {
         try {
             await TrussService.trussDataInIt();
-            const updatedTruss: Truss = this.createTrussById(_id);
-            const newPlantGrowthCond = updatedTruss.latestPlantGrowth <= plantGrowth;
-            const newPlantNumberCond = updatedTruss.latestPlantNumber >= plantNumber;
-            const exceptCond = updatedTruss.latestPlantGrowth == plantGrowth && updatedTruss.latestPlantNumber == plantNumber;
+            const updatedTruss: Truss = this.findTruss(_id);
+            const newPlantGrowthCond = updatedTruss.getLatestPlantGrowth() <= plantGrowth;
+            const newPlantNumberCond = updatedTruss.getLatestPlantNumber() >= plantNumber;
+            const exceptCond = updatedTruss.getLatestPlantGrowth() == plantGrowth && updatedTruss.getLatestPlantNumber() == plantNumber;
             if (newPlantGrowthCond && newPlantNumberCond && !exceptCond) {
-                const newStatus: Status = new Status(date, plantNumber, plantGrowth);
+                const newStatus: Status = new Status(new Date(date), plantNumber, plantGrowth);
                 const updateVal = { $push: { realStatus: newStatus } };
                 await TrussCollection.updateOne(_id, updateVal);
                 // If update plant number is zero, we also clear the truss
@@ -147,10 +142,10 @@ class TrussService {
     async clearTruss(clearedTrussId: string) {
         try {
             await TrussService.trussDataInIt();
-            const clearedTruss: Truss = this.createTrussById(clearedTrussId);
-            if (clearedTruss.plantId) {
+            const clearedTruss: Truss = this.findTruss(clearedTrussId);
+            if (clearedTruss.getPlantId()) {
                 // Insert a new History
-                const newHistory = new BasicHistoryModel(clearedTrussId, clearedTruss.plantId, clearedTruss.startDate, clearedTruss.realStatus);
+                const newHistory = new BasicHistoryModel().createHistoryOfTruss(clearedTruss);
                 HistoryService.insertOneHistory(newHistory);
                 // Reset truss
                 const updateVal = {
@@ -173,13 +168,13 @@ class TrussService {
     async createNewTruss({ _id, startDate, seedId }: CreateTrussRequest) {
         try {
             await TrussService.trussDataInIt();
-            const createdTruss: Truss = this.createTrussById(_id);
-            if (!createdTruss.plantId) {
+            const createdTruss: Truss = this.findTruss(_id);
+            if (!createdTruss.getPlantId()) {
                 const selectedSeed: SeedModel = await SeedService.getSeedInfo(seedId);
-                const firstStatus = new Status(startDate, selectedSeed.plantNumber, 1);
-                if (selectedSeed.plantNumber > createdTruss.maxHole) {
-                    firstStatus.plantNumber = createdTruss.maxHole;
-                    SeedService.updateSeedNumber(selectedSeed._id, Number(selectedSeed.plantNumber - createdTruss.maxHole));
+                const firstStatus = new Status(new Date(startDate), selectedSeed.plantNumber, 1);
+                if (selectedSeed.plantNumber > createdTruss.getMaxHole()) {
+                    firstStatus.plantNumber = createdTruss.getMaxHole();
+                    SeedService.updateSeedNumber(selectedSeed._id, Number(selectedSeed.plantNumber - createdTruss.getMaxHole()));
                 } else {
                     SeedService.deleteOneSeedById(selectedSeed._id);
                 }
@@ -215,8 +210,8 @@ class TrussService {
     async revertTrussStatus({ _id, statusIndex }: RevertTrussRequest) {
         try {
             await TrussService.trussDataInIt();
-            const revertedTruss: Truss = this.createTrussById(_id);
-            if (statusIndex >= 0 && revertedTruss.realStatus.length > 1) {
+            const revertedTruss: Truss = this.findTruss(_id);
+            if (statusIndex >= 0 && revertedTruss.getRealStatus().length > 1) {
                 const updateVal = {
                     $push: {
                         realStatus: {
@@ -238,7 +233,7 @@ class TrussService {
     async getStatistics({ block, plantGrowth, plantId }: any) {
         try {
             await TrussService.trussDataInIt();
-            const trussArr = TrussService.trussData.filter(truss => {
+            const filterTrussArr = TrussService.rawTrussData.filter(truss => {
                 let filterCond = true;
                 if (block) {
                     filterCond &&= (truss.block[0] == block);
@@ -252,28 +247,24 @@ class TrussService {
                 }
                 return filterCond;
             });
-            const resultStats = this.getDiscreteStats(this.createTrussArr(trussArr));
-            return resultStats;
+            const trussArr = filterTrussArr.map(truss => new TrussFactory().createTruss(truss));
+            return this.getDiscreteStats(trussArr);
         } catch (err) {
             console.log(err)
             return new Error(err);
         }
     }
 
-    private getDiscreteStats(trussArrByBlock: Truss[]): Statistics[] {
-        var statistics: Statistics[] = [];
-        trussArrByBlock.forEach(({ plantId, plantType, latestPlantNumber }) => {
-            if (plantId) {
-                const statIndex = statistics.findIndex(stat => stat.plantName == plantType.getPlantName());
+    private getDiscreteStats(trussArrByBlock: Truss[]): Statistic[] {
+        var statistics: Statistic[] = [];
+        trussArrByBlock.forEach(truss => {
+            if (truss.getPlantType()) {
+                const statIndex = statistics.findIndex(stat => stat.plantName == truss.getPlantType().getPlantName());
                 if (statIndex > -1) {
-                    statistics[statIndex].plantNumber += latestPlantNumber;
+                    statistics[statIndex].plantNumber += truss.getLatestPlantNumber();
                 }
                 else {
-                    const stat: Statistics = {
-                        plantName: plantType.getPlantName(),
-                        plantColor: plantType.getPlantColor(),
-                        plantNumber: latestPlantNumber
-                    }
+                    const stat: Statistic = new Statistic().createStatisticOfTruss(truss);
                     statistics.push(stat);
                 }
             }
@@ -282,7 +273,7 @@ class TrussService {
     }
 
     async getTrussHistory(trussId: string) {
-        const aggregateMethod = [{ $match: { trussId: new ObjectId(trussId) } }, ...PLANT_LOOKUP_AGGREGATION]
+        const aggregateMethod = [{ $match: { trussId: new ObjectId(trussId) } }, ...PLANT_MERGE_LOOKUP_AGGREGATION]
         return await HistoryCollection.aggregate(aggregateMethod);
     }
 }

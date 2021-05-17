@@ -19,7 +19,7 @@ class PlantService {
 
     private async resetPlantData() {
         PlantService.plantData = [];
-        await this.getPlantData();
+        return await this.getPlantData();
     }
 
     async updatePlant(updatedObj: PlantModel): Promise<any> {

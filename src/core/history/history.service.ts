@@ -1,6 +1,6 @@
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
 import { HISTORY_COLLECTION, MAIN_DATABASE, PLANT_LOOKUP_AGGREGATION } from "../../server-constants";
-import { BasicHistoryModel, HistoryModel, ResponseHistoryModel } from "./history.model";
+import { BasicHistoryModel, ResponseHistoryModel } from "./history.model";
 
 const HistoryCollection = new MongoDB_Collection(MAIN_DATABASE, HISTORY_COLLECTION);
 

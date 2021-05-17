@@ -1,16 +1,17 @@
 import { BasicPlantModel, Plant, PlantModel } from "../plant/plant.model";
-import { Status } from "../truss/truss.model";
+import { Status, Truss } from "../truss/truss.model";
 
 export class BasicHistoryModel {
-    trussId: string;
-    plantId: string;
-    startDate: string;
-    realStatus: Status[];
-    constructor(trussId: string, plantId: string, startDate: string, realStatus: Status[]) {
-        this.trussId = trussId;
-        this.plantId = plantId;
-        this.startDate = startDate;
-        this.realStatus = realStatus;
+    trussId: string = '';
+    plantId: string = '';
+    startDate: Date = new Date();
+    realStatus: Status[] = [];
+    createHistoryOfTruss(truss: Truss): BasicHistoryModel {
+        this.trussId = truss.getTrussId();
+        this.plantId = truss.getPlantId();
+        this.startDate = truss.getStartDate();
+        this.realStatus = truss.getRealStatus();
+        return this;
     }
 }
 
