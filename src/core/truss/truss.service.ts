@@ -27,17 +27,17 @@ class TrussService {
         }
     }
 
+    private static async resetTrussData(): Promise<void> {
+        TrussService.trussData = [];
+        await TrussService.trussDataInIt();
+    }
+
     private findTruss(trussId: string): Truss {
         const truss = TrussService.trussData.find(truss => truss.getTrussId() == trussId);
         if (truss) {
             return truss;
         }
         throw new Error(`Truss with id: '${trussId}' does not exist!`);
-    }
-
-    private static async resetTrussData(): Promise<void> {
-        TrussService.trussData = [];
-        await TrussService.trussDataInIt();
     }
 
     private sortTrussData(block: string, trussData: TrussBasicInfo[]): any[] {
@@ -102,17 +102,27 @@ class TrussService {
     }
 
     async getTrussDataByBlock(block: string = "all"): Promise<Truss[]> {
-        await TrussService.trussDataInIt();
-        if (block == "all") {
-            return TrussService.trussData.map(truss => truss.getBasicTrussInfo());
+        try {
+            await TrussService.trussDataInIt();
+            if (block == "all") {
+                return TrussService.trussData.map(truss => truss.getBasicTrussInfo());
+            }
+            const trussArr = TrussService.trussData.filter(truss => truss.getBlock() == block).map(truss => truss.getBasicTrussInfo());
+            return this.sortTrussData(block, trussArr);
+        } catch (err) {
+            console.log(err);
+            return err;
         }
-        const trussArr = TrussService.trussData.filter(truss => truss.getBlock() == block).map(truss => truss.getBasicTrussInfo());
-        return this.sortTrussData(block, trussArr);
     }
 
     async getRawTrussDataByBlock(block: string): Promise<RawTrussModel[]> {
-        await TrussService.trussDataInIt();
-        return TrussService.rawTrussData.filter(truss => truss.block == block);
+        try {
+            await TrussService.trussDataInIt();
+            return TrussService.rawTrussData.filter(truss => truss.block == block);
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     async updateTrussStatus({ _id, date, plantNumber, plantGrowth }: NewStatusRequest) {
@@ -135,7 +145,7 @@ class TrussService {
             throw new Error("Invalid update status request!");
         } catch (err) {
             console.log(err);
-            return new Error(err);
+            return err;
         }
     }
 
@@ -161,7 +171,7 @@ class TrussService {
             throw new Error(`Cannot clear truss with ID: "${clearedTrussId}" because it is now empty.`);
         } catch (err) {
             console.log(err);
-            return new Error(err);
+            return err;
         }
     }
 
@@ -191,7 +201,7 @@ class TrussService {
             throw new Error(`Cannot create truss with ID: "${_id}" because it is now being planted.`);
         } catch (err) {
             console.log(err);
-            return new Error(err);
+            return err;
         }
     }
 
@@ -203,7 +213,7 @@ class TrussService {
             return await TrussService.resetTrussData();
         } catch (err) {
             console.log(err)
-            return new Error(err);
+            return new err;
         }
     }
 
@@ -226,7 +236,7 @@ class TrussService {
             throw new Error("Invalid index status to revert.");
         } catch (err) {
             console.log(err)
-            return new Error(err);
+            return err;
         }
     }
 
@@ -251,7 +261,7 @@ class TrussService {
             return this.getDiscreteStats(trussArr);
         } catch (err) {
             console.log(err)
-            return new Error(err);
+            return err;
         }
     }
 

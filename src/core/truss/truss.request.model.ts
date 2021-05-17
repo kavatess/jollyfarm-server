@@ -16,7 +16,7 @@ export interface RevertTrussRequest {
 
 export interface NewStatusRequest {
     _id: string;
-    date: string;
+    date: Date;
     plantNumber: number;
     plantGrowth: number;
 }

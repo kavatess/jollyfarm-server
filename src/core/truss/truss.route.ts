@@ -26,8 +26,12 @@ TrussRouter.post(REQUEST_URL_HEAD + '/truss/statistics', async (req: Request, re
 
 TrussRouter.post(REQUEST_URL_HEAD + '/truss/update/status', async (req: Request, res: Response) => {
     const newStatusTruss: NewStatusRequest = req.body;
-    const response = await TrussService.updateTrussStatus(newStatusTruss);
-    res.json(response);
+    if (new Date(newStatusTruss.date).toDateString() == "Invalid Date") {
+        const response = await TrussService.updateTrussStatus(newStatusTruss);
+        res.json(response);
+    } else {
+        res.sendStatus(403);
+    }
 });
 
 TrussRouter.post(REQUEST_URL_HEAD + '/truss/create', async (req: Request, res: Response) => {
