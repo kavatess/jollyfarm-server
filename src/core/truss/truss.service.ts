@@ -29,7 +29,7 @@ class TrussService {
 
     private static async resetTrussData(): Promise<void> {
         TrussService.trussData = [];
-        await TrussService.trussDataInIt();
+        return await TrussService.trussDataInIt();
     }
 
     private findTruss(trussId: string): Truss {
