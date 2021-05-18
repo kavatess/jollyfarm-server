@@ -2,7 +2,7 @@ import * as express from "express";
 import { Router, Request, Response } from "express";
 import { REQUEST_URL_HEAD } from "../../server-constants";
 import { PlantModel } from "./plant.model";
-import PlantService from "./plant.service";
+import { PlantService } from "./plant.service";
 
 export const PlantRouter: Router = express.Router();
 

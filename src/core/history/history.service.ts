@@ -1,28 +1,31 @@
+import { ObjectId } from "bson";
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
-import { HISTORY_COLLECTION, MAIN_DATABASE, PLANT_LOOKUP_AGGREGATION } from "../../server-constants";
+import { HISTORY_COLLECTION, MAIN_DATABASE, PLANT_LOOKUP_AGGREGATION, PLANT_MERGE_LOOKUP_AGGREGATION } from "../../server-constants";
 import { BasicHistoryModel, ResponseHistoryModel } from "./history.model";
 
-const HistoryCollection = new MongoDB_Collection(MAIN_DATABASE, HISTORY_COLLECTION);
-
-class HistoryService {
+export class HistoryService {
+    private static historyCollection: MongoDB_Collection = new MongoDB_Collection(MAIN_DATABASE, HISTORY_COLLECTION);
     private static historyData: ResponseHistoryModel[] = [];
 
-    static async getHistoryData() {
+    public static async getHistoryData() {
         if (!HistoryService.historyData.length) {
-            HistoryService.historyData = await HistoryCollection.aggregate(PLANT_LOOKUP_AGGREGATION);
+            HistoryService.historyData = await HistoryService.historyCollection.aggregate(PLANT_LOOKUP_AGGREGATION);
         }
         return HistoryService.historyData;
     }
 
-    static async resetHistoryData() {
+    private static async resetHistoryData() {
         HistoryService.historyData = [];
         return await HistoryService.getHistoryData();
     }
 
-    async insertOneHistory(newHistory: BasicHistoryModel) {
-        await HistoryCollection.insertOne(newHistory);
+    public static async insertOneHistory(newHistory: BasicHistoryModel) {
+        await HistoryService.historyCollection.insertOne(newHistory);
         return await HistoryService.resetHistoryData();
     }
-}
 
-export default new HistoryService();
+    public static async getHistoryByTrussId(trussId: string) {
+        const aggregateMethod = [{ $match: { trussId: new ObjectId(trussId) } }, ...PLANT_MERGE_LOOKUP_AGGREGATION];
+        return await HistoryService.historyCollection.aggregate(aggregateMethod);
+    }
+}

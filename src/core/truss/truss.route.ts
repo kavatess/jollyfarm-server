@@ -1,8 +1,8 @@
-import TrussService from "./truss.service";
 import { Router, Request, Response } from "express";
 import * as express from "express";
 import { CreateTrussRequest, NewStatusRequest, RevertTrussRequest, UpdateMaxHoleRequest } from "./truss.request.model";
 import { REQUEST_URL_HEAD } from "../../server-constants";
+import { TrussService } from "./truss.service";
 
 export const TrussRouter: Router = express.Router();
 
@@ -55,11 +55,5 @@ TrussRouter.post(REQUEST_URL_HEAD + '/truss/update/maxhole', async (req: Request
 TrussRouter.post(REQUEST_URL_HEAD + '/truss/revert/status', async (req: Request, res: Response) => {
     const revertStatus: RevertTrussRequest = req.body;
     const response = await TrussService.revertTrussStatus(revertStatus);
-    res.json(response);
-});
-
-TrussRouter.post(REQUEST_URL_HEAD + '/truss/history/:id', async (req: Request, res: Response) => {
-    const trussId = req.params.id;
-    const response = await TrussService.getTrussHistory(trussId);
     res.json(response);
 });

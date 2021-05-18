@@ -2,7 +2,7 @@ import * as express from "express";
 import { Router, Request, Response } from "express";
 import { REQUEST_URL_HEAD } from "../../server-constants";
 import { SeedModel, UpdateSeedRequest } from "./seed.model";
-import SeedService from "./seed.service";
+import { SeedService } from "./seed.service";
 
 export const SeedRouter: Router = express.Router();
 

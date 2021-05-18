@@ -2,27 +2,23 @@ import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
 import { MAIN_DATABASE, PLANT_COLLECTION } from "../../server-constants";
 import { Plant, PlantModel } from "./plant.model";
 
-class PlantService {
-    plantCollection: MongoDB_Collection = new MongoDB_Collection(MAIN_DATABASE, PLANT_COLLECTION);
+export class PlantService {
+    private static plantCollection: MongoDB_Collection = new MongoDB_Collection(MAIN_DATABASE, PLANT_COLLECTION);
     private static plantData: Plant[] = [];
 
-    constructor() {
-        this.getPlantData();
-    }
-
-    async getPlantData() {
+    public static async getPlantData() {
         if (!PlantService.plantData.length) {
-            PlantService.plantData = await this.plantCollection.findAll();
+            PlantService.plantData = await PlantService.plantCollection.findAll();
         }
         return PlantService.plantData;
     }
 
-    private async resetPlantData() {
+    private static async resetPlantData() {
         PlantService.plantData = [];
-        return await this.getPlantData();
+        return await PlantService.getPlantData();
     }
 
-    async updatePlant(updatedObj: PlantModel): Promise<any> {
+    public static async updatePlant(updatedObj: PlantModel): Promise<any> {
         const updateVal = {
             $set: {
                 plantName: updatedObj.plantName,
@@ -37,23 +33,21 @@ class PlantService {
                 wormMonth: updatedObj.wormMonth
             }
         }
-        await this.plantCollection.updateOne(updatedObj._id, updateVal);
-        return await this.resetPlantData();
+        await PlantService.plantCollection.updateOne(updatedObj._id, updateVal);
+        return await PlantService.resetPlantData();
     }
 
-    async getPlantInfo(plantId: string) {
-        return await this.plantCollection.findOneById(plantId);
+    public static async getPlantInfo(plantId: string) {
+        return await PlantService.plantCollection.findOneById(plantId);
     }
 
-    async insertOnePlant(newPlant: PlantModel) {
-        await this.plantCollection.insertOne(newPlant);
-        return await this.resetPlantData();
+    public static async insertOnePlant(newPlant: PlantModel) {
+        await PlantService.plantCollection.insertOne(newPlant);
+        return await PlantService.resetPlantData();
     }
 
-    async deleteOnePlantById(plantId: string) {
-        await this.plantCollection.deleteOneById(plantId);
-        return await this.resetPlantData();
+    public static async deleteOnePlantById(plantId: string) {
+        await PlantService.plantCollection.deleteOneById(plantId);
+        return await PlantService.resetPlantData();
     }
 }
-
-export default new PlantService();

@@ -2,9 +2,13 @@ import express, { Application } from 'express';
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import dotenv from "dotenv";
 import { TrussRouter } from './core/truss/truss.route';
 import { SeedRouter } from './core/seed/seed.route';
 import { PlantRouter } from './core/plant/plant.route';
+import { HistoryRouter } from './core/history/history.route';
+
+dotenv.config();
 // rest of the code remains same
 const app: Application = express();
 const PORT = process.env.PORT || 1000;
@@ -29,6 +33,7 @@ app.use(express.json());
 app.use(TrussRouter);
 app.use(PlantRouter);
 app.use(SeedRouter);
+app.use(HistoryRouter);
 
 app.listen(PORT, () => {
     console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
