@@ -8,12 +8,11 @@ export class MongoDB_Collection {
         this.collectionInit();
     }
 
-    public async collectionInit(): Promise<Collection> {
+    public async collectionInit(): Promise<void> {
         if (!this.collection) {
             const db: Db = await MongoDatabase.getDatabase(this.dbName);
             this.collection = db.collection(this.colName);
         }
-        return this.collection;
     }
 
     public async findOneById(id: string) {

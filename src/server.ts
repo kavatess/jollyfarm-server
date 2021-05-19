@@ -7,13 +7,15 @@ import { TrussRouter } from './core/truss/truss.route';
 import { SeedRouter } from './core/seed/seed.route';
 import { PlantRouter } from './core/plant/plant.route';
 import { HistoryRouter } from './core/history/history.route';
+import { AuthRouter } from './auth/authentication';
 
+// Initialize application variables
 dotenv.config();
-// rest of the code remains same
 const app: Application = express();
 const PORT = process.env.PORT || 1000;
 const allowedOrigins: string[] = ['http://localhost:4200',
     'http://yourapp.com', 'http://127.0.0.1:5500'];
+// Activate additional libraries
 app.use(cors({
     origin: function (origin, callback) {
         // allow requests with no origin 
@@ -30,6 +32,8 @@ app.use(cors({
 app.use(helmet());
 app.use(morgan('common'));
 app.use(express.json());
+// Set programmed router application
+app.use(AuthRouter);
 app.use(TrussRouter);
 app.use(PlantRouter);
 app.use(SeedRouter);

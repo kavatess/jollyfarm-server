@@ -13,6 +13,7 @@ export const SEED_COLLECTION = 'seed';
 export const HISTORY_COLLECTION = 'history';
 export const SEED_STORAGE_COLLECTION = 'seed-nursery-storage';
 export const USER_INFO_COLLECTION = 'user-info';
+export const AUTH_REQUEST_URL_BEGIN = '/api/auth';
 export const REQUEST_URL_HEAD = '/api/v1';
 export const PLANT_MERGE_LOOKUP_AGGREGATION = [
     {
