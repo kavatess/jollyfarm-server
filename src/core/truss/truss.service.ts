@@ -22,7 +22,7 @@ export class TrussService {
 
     private static async resetTrussData(): Promise<void> {
         TrussService.trussData = [];
-        return await TrussService.trussDataInIt();
+        await TrussService.trussDataInIt();
     }
 
     private static findTruss(trussId: string): Truss {
@@ -128,7 +128,7 @@ export class TrussService {
             if (newPlantGrowthCond && newPlantNumberCond && !exceptCond) {
                 const newStatus: Status = new Status(new Date(date), plantNumber, plantGrowth);
                 const updateVal = { $push: { realStatus: newStatus } };
-                await TrussService.trussCollection.updateOne(_id, updateVal);
+                await TrussService.trussCollection.updateOneById(_id, updateVal);
                 // If update plant number is zero, we also clear the truss
                 if (!newStatus.plantNumber) {
                     return await this.clearTruss(_id);

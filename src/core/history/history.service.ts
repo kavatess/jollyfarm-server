@@ -20,12 +20,17 @@ export class HistoryService {
     }
 
     public static async insertOneHistory(newHistory: BasicHistoryModel) {
-        await HistoryService.historyCollection.insertOne(newHistory);
-        return await HistoryService.resetHistoryData();
+        try {
+            await HistoryService.historyCollection.insertOne(newHistory);
+            return await HistoryService.resetHistoryData();
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     public static async getHistoryByTrussId(trussId: string) {
-        const aggregateMethod = [{ $match: { trussId: new ObjectId(trussId) } }, ...PLANT_MERGE_LOOKUP_AGGREGATION];
+        const aggregateMethod = [{ $match: { trussId: new ObjectId(trussId) } }, ...PLANT_LOOKUP_AGGREGATION];
         return await HistoryService.historyCollection.aggregate(aggregateMethod);
     }
 }

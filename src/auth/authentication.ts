@@ -6,15 +6,15 @@ import { AuthService } from "./authentication.service";
 
 export const AuthRouter: Router = express.Router();
 
-AuthRouter.post(AUTH_REQUEST_URL_BEGIN + '/login', async (req: Request, res: Response, next) => {
+AuthRouter.post(AUTH_REQUEST_URL_BEGIN + '/login', async (req: Request, res: Response) => {
     try {
         const loginInfo = req.body;
         const userInfo = await AuthService.verifyUser(loginInfo);
         const authToken = jwt.sign(userInfo, AUTH_TOKEN_SECRET);
-        res.json({ token: authToken });
+        res.json({ token: authToken, user: userInfo });
     } catch (err) {
         console.log(err);
-        res.sendStatus(403);
+        res.sendStatus(401);
     }
 });
 
@@ -25,6 +25,6 @@ AuthRouter.post(REQUEST_URL_HEAD + '/*', async (req: Request, res: Response, nex
         jwt.verify(authToken, AUTH_TOKEN_SECRET);
         next();
     } catch (err) {
-        res.sendStatus(403);
+        res.sendStatus(401);
     }
 });
