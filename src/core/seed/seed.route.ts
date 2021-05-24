@@ -1,7 +1,7 @@
 import * as express from "express";
 import { Router, Request, Response } from "express";
 import { REQUEST_URL_HEAD } from "../../server-constants";
-import { SeedModel, UpdateSeedRequest } from "./seed.model";
+import { BasicSeedModel, UpdateSeedRequest } from "./seed.model";
 import { SeedService } from "./seed.service";
 
 export const SeedRouter: Router = express.Router();
@@ -18,7 +18,7 @@ SeedRouter.post(REQUEST_URL_HEAD + '/seed/update', async (req: Request, res: Res
 });
 
 SeedRouter.post(REQUEST_URL_HEAD + '/seed/insert', async (req: Request, res: Response) => {
-    const addedSeedArr: SeedModel[] = req.body;
+    const addedSeedArr: BasicSeedModel[] = req.body;
     const response = await SeedService.insertManySeed(addedSeedArr);
     res.send(response);
 });

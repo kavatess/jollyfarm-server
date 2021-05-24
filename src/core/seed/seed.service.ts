@@ -1,3 +1,4 @@
+
 import { ObjectId } from "bson";
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
 import { MAIN_DATABASE, PLANT_LOOKUP_AGGREGATION, SEED_COLLECTION, SEED_STORAGE_COLLECTION, STORAGE_DATABASE } from "../../server-constants";
@@ -25,7 +26,7 @@ export class SeedService {
     public static async insertManySeed(newSeedArr: BasicSeedModel[]) {
         const newSeedList = newSeedArr.map(seed => {
             let seedObj = Object.assign(seed);
-            seedObj._id = new ObjectId(seed.plantId);
+            seedObj.plantId = new ObjectId(seed.plantId);
             return seedObj;
         });
         await SeedService.seedCollection.insertMany(newSeedList);
@@ -35,7 +36,7 @@ export class SeedService {
 
     public static async updateSeedNumber(updatedSeedId: string, newPlantNumber: number): Promise<any> {
         const updateVal = { $set: { plantNumber: newPlantNumber } };
-        await SeedService.seedCollection.updateOne(updatedSeedId, updateVal);
+        await SeedService.seedCollection.updateOneById(updatedSeedId, updateVal);
         return await this.resetSeedData();
     }
 

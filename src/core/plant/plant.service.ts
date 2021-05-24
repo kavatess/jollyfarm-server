@@ -1,10 +1,10 @@
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
 import { MAIN_DATABASE, PLANT_COLLECTION } from "../../server-constants";
-import { Plant, PlantModel } from "./plant.model";
+import { PlantModel } from "./plant.model";
 
 export class PlantService {
     private static plantCollection: MongoDB_Collection = new MongoDB_Collection(MAIN_DATABASE, PLANT_COLLECTION);
-    private static plantData: Plant[] = [];
+    private static plantData: PlantModel[] = [];
 
     public static async getPlantData() {
         if (!PlantService.plantData.length) {
@@ -33,7 +33,7 @@ export class PlantService {
                 wormMonth: updatedObj.wormMonth
             }
         }
-        await PlantService.plantCollection.updateOne(updatedObj._id, updateVal);
+        await PlantService.plantCollection.updateOneById(updatedObj._id, updateVal);
         return await PlantService.resetPlantData();
     }
 

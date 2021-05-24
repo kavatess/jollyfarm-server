@@ -1,5 +1,5 @@
 import { Collection, Db, ObjectId } from "mongodb";
-import { MongoDatabase } from "./connect.mongodb";
+import { MongoDB_Connection } from "./mongodb-connection";
 
 export class MongoDB_Collection {
     private collection!: Collection;
@@ -10,7 +10,7 @@ export class MongoDB_Collection {
 
     public async collectionInit(): Promise<void> {
         if (!this.collection) {
-            const db: Db = await MongoDatabase.getDatabase(this.dbName);
+            const db: Db = await MongoDB_Connection.getDatabase(this.dbName);
             this.collection = db.collection(this.colName);
         }
     }

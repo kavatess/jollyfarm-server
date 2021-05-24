@@ -1,12 +1,11 @@
-export interface UserModel {
+export interface User {
     _id: string;
     phoneNumber: string;
     password: string;
-    id: string;
+    idNumber: string;
     name: string;
     dateOfBirth: string;
     address: string;
-    bornIn: string;
     role: string;
     authorization: string[];
 }
