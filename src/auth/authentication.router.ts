@@ -3,7 +3,7 @@ import * as express from "express";
 import { AUTH_REQUEST_URL_BEGIN, AUTH_TOKEN_SECRET, REQUEST_URL_HEAD } from "../server-constants";
 import * as jwt from 'jsonwebtoken';
 import AuthService from "./services/authentication.service";
-import { User } from "./models/user.model";
+import { UpdateUserRequest } from "./models/update-user-request.model";
 
 export const AuthRouter: Router = express.Router();
 
@@ -30,9 +30,9 @@ AuthRouter.post(REQUEST_URL_HEAD + '/*', async (req: Request, res: Response, nex
     }
 });
 
-AuthRouter.post(REQUEST_URL_HEAD + '/user/update', async (req: Request, res: Response) => {
+AuthRouter.post(AUTH_REQUEST_URL_BEGIN + '/user/update', async (req: Request, res: Response) => {
     try {
-        const updatedUser: User = req.body;
+        const updatedUser: UpdateUserRequest = req.body;
         const response = await AuthService.changeUserInfo(updatedUser);
         res.send(response);
     } catch (err) {

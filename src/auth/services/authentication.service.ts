@@ -1,5 +1,6 @@
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
 import { AUTHENTICATION_DATABASE, USER_INFO_COLLECTION } from "../../server-constants";
+import { UpdateUserRequest } from "../models/update-user-request.model";
 import { User } from "../models/user.model";
 
 class AuthService {
@@ -25,7 +26,7 @@ class AuthService {
         return userInfo[0];
     }
 
-    public async changeUserInfo(userInfo: User) {
+    public async changeUserInfo(userInfo: UpdateUserRequest) {
         const updateMethod = {
             $set: {
                 name: userInfo.name,
