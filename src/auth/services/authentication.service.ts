@@ -1,12 +1,11 @@
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
-import { AUTHENTICATION_DATABASE, USER_INFO_COLLECTION } from "../../server-constants";
-import { UpdateUserRequest } from "../models/update-user-request.model";
-import { User } from "../models/user.model";
+import { AUTH_ROLES, COLLECTION, DATABASE, EMPLOYEE_AUTH_ARR } from "../../server-constants";
+import { User, UpdateUserRequest, RegisterInfo } from "../models/user.model";
 
 class AuthService {
-    private userCollection: MongoDB_Collection = new MongoDB_Collection(AUTHENTICATION_DATABASE, USER_INFO_COLLECTION);
+    private userCollection: MongoDB_Collection = new MongoDB_Collection(DATABASE.AUTHENTICATION, COLLECTION.USER_INFO);
 
-    private async findUser(phoneNumber: string, password: string): Promise<User[]> {
+    public async findUser(phoneNumber: string, password: string): Promise<User[]> {
         const findCond = [
             {
                 $match: { $and: [{ phoneNumber: phoneNumber }, { password: password }] }
@@ -15,15 +14,11 @@ class AuthService {
                 $project: { password: 0 }
             }
         ];
-        return await this.userCollection.aggregate(findCond);
-    }
-
-    public async verifyUser({ phoneNumber, password }: any): Promise<User> {
-        const userInfo = await this.findUser(phoneNumber, password);
-        if (!userInfo.length) {
-            throw new Error("Wrong phone number or password.")
+        const userArr = await this.userCollection.aggregate(findCond);
+        if (!userArr.length) {
+            throw new Error("Wrong phone number or password.");
         }
-        return userInfo[0];
+        return userArr[0];
     }
 
     public async changeUserInfo(userInfo: UpdateUserRequest) {
@@ -37,6 +32,21 @@ class AuthService {
             }
         }
         return await this.userCollection.updateOneById(userInfo._id, updateMethod);
+    }
+
+    public async changeLoginPassword(phoneNumber: string, oldPassword: string, newPassword: string) {
+        const authCond = { $and: [{ phoneNumber: phoneNumber }, { password: oldPassword }] };
+        const updateMethod = { $set: { password: newPassword } };
+        return await this.userCollection.updateOne(authCond, updateMethod);
+    }
+
+    public async registerUser(registration: RegisterInfo) {
+        const newUser: User = {
+            ...registration,
+            role: AUTH_ROLES.EMPLOYEE,
+            authorization: EMPLOYEE_AUTH_ARR
+        }
+        return await this.userCollection.insertOne(newUser);
     }
 }
 

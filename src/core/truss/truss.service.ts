@@ -1,14 +1,14 @@
 import { MongoDB_Collection } from "../../configs/collection-access.mongodb";
 import { Status, Truss, RawTrussModel, TrussBasicInfo, TrussFactory, Statistic, PlantingTrussInfo } from "./truss.model";
 import { CreateTrussRequest, NewStatusRequest, RevertTrussRequest, UpdateMaxHoleRequest } from "./truss.request.model";
-import { MAIN_DATABASE, PLANT_LOOKUP_AGGREGATION, TRUSS_COLLECTION } from "../../server-constants";
-import { HistoryService } from '../history/history.service';
-import { SeedService } from '../seed/seed.service';
+import { COLLECTION, DATABASE, PLANT_LOOKUP_AGGREGATION } from "../../server-constants";
+import HistoryService from '../history/history.service';
+import SeedService from '../seed/seed.service';
 import { SeedModel } from "../seed/seed.model";
 import { BasicHistoryModel } from "../history/history.model";
 
 export class TrussService {
-    private static trussCollection = new MongoDB_Collection(MAIN_DATABASE, TRUSS_COLLECTION);
+    private static trussCollection = new MongoDB_Collection(DATABASE.FARM, COLLECTION.TRUSS);
     private static rawTrussData: RawTrussModel[] = [];
     private static trussData: Truss[] = [];
 

@@ -1,11 +1,17 @@
-export interface User {
+export interface UpdateUserRequest {
     _id: string;
-    phoneNumber: string;
-    password: string;
-    idNumber: string;
     name: string;
     dateOfBirth: string;
     address: string;
+    idNumber: string;
+    phoneNumber: string;
+}
+
+export interface RegisterInfo extends UpdateUserRequest {
+    password: string;
+}
+
+export interface User extends RegisterInfo {
     role: string;
     authorization: string[];
 }

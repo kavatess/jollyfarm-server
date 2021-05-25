@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import * as express from "express";
 import { REQUEST_URL_HEAD } from "../../server-constants";
-import { HistoryService } from "./history.service";
+import HistoryService from "./history.service";
 
 export const HistoryRouter: Router = express.Router();
 
