@@ -1,5 +1,5 @@
 import { Collection, Db, ObjectId } from "mongodb";
-import { MongoDB_Connection } from "./mongodb-connection";
+import { MongoDB_Connection } from "./mongodb-connection.config";
 
 export class MongoDB_Collection {
     private collection!: Collection;

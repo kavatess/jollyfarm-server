@@ -1,5 +1,5 @@
 import { BasicPlantModel, Plant, PlantModel } from "../plant/plant.model";
-import { Status, Truss } from "../truss/truss.model";
+import { Status, Truss } from "../truss/models/truss.model";
 
 export class BasicHistoryModel {
     trussId: string = '';
@@ -7,10 +7,10 @@ export class BasicHistoryModel {
     startDate: Date = new Date();
     realStatus: Status[] = [];
     createHistoryOfTruss(truss: Truss): BasicHistoryModel {
-        this.trussId = truss.getTrussId();
-        this.plantId = truss.getPlantId();
-        this.startDate = truss.getStartDate();
-        this.realStatus = truss.getRealStatus();
+        this.trussId = truss.id;
+        this.plantId = truss.plantId;
+        this.startDate = truss.startDate;
+        this.realStatus = truss.realStatus;
         return this;
     }
 }

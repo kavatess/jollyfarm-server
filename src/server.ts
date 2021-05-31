@@ -7,7 +7,7 @@ import { TrussRouter } from './core/truss/truss.route';
 import { SeedRouter } from './core/seed/seed.route';
 import { PlantRouter } from './core/plant/plant.route';
 import { HistoryRouter } from './core/history/history.route';
-import { AuthRouter } from './auth/authentication.router';
+import { AuthRouter } from './auth/authentication.route';
 
 // Initialize application variables
 dotenv.config();

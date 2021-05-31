@@ -1,3 +1,4 @@
+import { ObjectId } from "bson";
 import { floor } from "mathjs";
 import { Plant, PlantModel } from "../plant/plant.model";
 
@@ -12,7 +13,7 @@ export interface DeletedSeedModel {
 
 export interface BasicSeedModel {
     _id: string;
-    plantId: string;
+    plantId: ObjectId;
     startDate: string;
     plantNumber: number;
 }
@@ -23,7 +24,7 @@ export interface SeedModel extends BasicSeedModel {
 
 export class Seed {
     private _id: string;
-    private plantId: string;
+    private plantId: ObjectId;
     private startDate: Date;
     private plantNumber: number;
     private plantType: Plant;
@@ -37,7 +38,7 @@ export class Seed {
     getSeedId(): string {
         return this._id;
     }
-    getPlantId(): string {
+    getPlantId(): ObjectId {
         return this.plantId;
     }
     getStartDate(): Date {
@@ -49,7 +50,7 @@ export class Seed {
     setSeedId(seedId: string): void {
         this._id = seedId;
     }
-    setPlantId(plantId: string): void {
+    setPlantId(plantId: ObjectId): void {
         this.plantId = plantId;
     }
     setStartDate(startDate: string): void {

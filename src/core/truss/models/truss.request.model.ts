@@ -20,3 +20,9 @@ export interface NewStatusRequest {
     plantNumber: number;
     plantGrowth: number;
 }
+
+export interface GetStatisticsQuery {
+    block: string;
+    plantGrowth: number;
+    plantId: string;
+}

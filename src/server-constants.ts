@@ -13,16 +13,16 @@ export const EMPLOYEE_AUTH_ARR = [
 export enum AUTH_ROLES {
     ADMIN = 'admin',
     EMPLOYEE = 'employee'
-}
+};
 // REQUEST START ROUTE
-export const AUTH_REQUEST_URL_BEGIN = '/api/auth';
-export const REQUEST_URL_HEAD = '/api/v1';
+export const AUTH_ROUTE_BEGIN = '/api/auth';
+export const API_ROUTE_BEGIN = '/api/v1';
 // DATABASE NAME
 export enum DATABASE {
     FARM = 'farm-database',
     STORAGE = 'data-storage',
     AUTHENTICATION = 'authentication-database'
-}
+};
 // COLLECTION NAME
 export enum COLLECTION {
     TRUSS = 'best-truss',
@@ -31,7 +31,7 @@ export enum COLLECTION {
     HISTORY = 'history',
     SEED_STORAGE = 'seed-nursery-storage',
     USER_INFO = 'user-info'
-}
+};
 // COMMON AGGREGATION METHOD
 export const PLANT_MERGE_LOOKUP_AGGREGATION = [
     {
