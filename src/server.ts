@@ -3,10 +3,10 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import { AuthRouter } from './auth/authentication.route';
-import { TrussRouter } from './truss/truss.route';
-import { SeedRouter } from './seed/seed.route';
-import { PlantRouter } from './plant/plant.route';
-import { HistoryRouter } from './history/history.route';
+import { TrussRouter } from './core/truss/truss.route';
+import { SeedRouter } from './core/seed/seed.route';
+import { PlantRouter } from './core/plant/plant.route';
+import { HistoryRouter } from './core/history/history.route';
 
 // Initialize application variables
 const app: Application = express();
