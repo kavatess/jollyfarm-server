@@ -1,5 +1,5 @@
-import { MongoDB_Collection } from "../../configs/mongodb-collection.config";
-import { COLLECTION, DATABASE } from "../../server-constants";
+import { MongoDB_Collection } from "../configs/mongodb-collection.config";
+import { COLLECTION, DATABASE } from "../server-constants";
 import { PlantModel } from "./plant.model";
 
 export class PlantService {

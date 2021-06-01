@@ -1,9 +1,7 @@
 import { ObjectId } from "bson";
-import { MongoDB_Collection } from "../../../configs/mongodb-collection.config";
-import { COLLECTION, DATABASE, PLANT_LOOKUP_AGGREGATION } from "../../../server-constants";
+import { TRUSS_COLLECTION } from "../../configs/mongodb-collection.config";
+import { PLANT_LOOKUP_AGGREGATION } from "../../server-constants";
 import { PlantingTrussInfo, RawTrussModel, Truss, TrussBasicInfo, TrussFactory } from "../models/truss.model";
-
-const TRUSS_COLLECTION = new MongoDB_Collection(DATABASE.FARM, COLLECTION.TRUSS);
 
 export async function getTrussById(trussId: string): Promise<Truss> {
     const findTrussArr: RawTrussModel[] = await TRUSS_COLLECTION.aggregate([{ $match: { _id: new ObjectId(trussId) } }, ...PLANT_LOOKUP_AGGREGATION]);

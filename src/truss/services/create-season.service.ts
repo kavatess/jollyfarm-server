@@ -1,21 +1,18 @@
-import { MongoDB_Collection } from "../../../configs/mongodb-collection.config";
+import { TRUSS_COLLECTION } from "../../configs/mongodb-collection.config";
 import { UpdateWriteOpResult } from "mongodb";
-import { COLLECTION, DATABASE } from "../../../server-constants";
 import { Status } from "../models/truss.model";
 import { CreateTrussRequest } from "../models/truss.request.model";
 import { getTrussById } from "./get-truss-arr.service";
-import { SeedModel } from "../../seed/seed.model";
-import { SeedService } from "../../seed/seed.service";
+import { SeedModel } from "../../seed/models/seed.model";
+import { SeedService } from "../../seed/services/seed.service";
 
-const TRUSS_COLLECTION = new MongoDB_Collection(DATABASE.FARM, COLLECTION.TRUSS);
-
-export async function createSeason({ _id, startDate, seedId }: CreateTrussRequest): Promise<UpdateWriteOpResult | Error> {
+export async function createSeason({ _id, seedId }: CreateTrussRequest): Promise<UpdateWriteOpResult | Error> {
     const createdTruss = await getTrussById(_id);
     // Check empty truss to create new season
     if (createdTruss.isEmptyTruss) {
         // Get seed to plant
         const selectedSeed: SeedModel = await SeedService.getSeedInfo(seedId);
-        const firstStatus = new Status(new Date(startDate), selectedSeed.plantNumber, 1);
+        const firstStatus = new Status({ plantNumber: selectedSeed.plantNumber, plantGrowth: 1 });
         if (selectedSeed.plantNumber > createdTruss.maxHole) {
             firstStatus.plantNumber = createdTruss.maxHole;
             SeedService.updateSeedNumber(selectedSeed._id, Number(selectedSeed.plantNumber - createdTruss.maxHole));
@@ -25,7 +22,7 @@ export async function createSeason({ _id, startDate, seedId }: CreateTrussReques
         const updateVal = {
             $set: {
                 plantId: selectedSeed.plantId,
-                startDate: startDate,
+                startDate: firstStatus.date,
                 realStatus: [firstStatus]
             }
         };

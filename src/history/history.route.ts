@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import * as express from "express";
-import { API_ROUTE_BEGIN } from "../../server-constants";
+import { API_ROUTE_BEGIN } from "../server-constants";
 import { HistoryService } from "./history.service";
 
 export const HistoryRouter: Router = express.Router();

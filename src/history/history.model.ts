@@ -35,7 +35,7 @@ class History {
         this.trussId = history.trussId;
         this.plantId = history.plantId;
         this.startDate = new Date(history.startDate);
-        this.realStatus = history.realStatus.map(sta => new Status(sta.date, sta.plantNumber, sta.plantGrowth));
+        this.realStatus = history.realStatus.map(sta => new Status(sta));
         this.plantType = new Plant(history.plantType);
     }
 }

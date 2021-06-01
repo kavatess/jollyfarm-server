@@ -1,4 +1,5 @@
-import { Statistic, Truss, TrussFactory } from "../models/truss.model";
+import { Truss, TrussFactory } from "../models/truss.model";
+import { Statistic } from "../models/statistic.model";
 import { getRawTrussArr } from "./get-truss-arr.service";
 
 export async function getStatistics({ block, plantGrowth, plantId }: any) {

@@ -2,7 +2,7 @@
 import { ObjectId } from "bson";
 import { MongoDB_Collection } from "../../configs/mongodb-collection.config";
 import { COLLECTION, DATABASE, PLANT_LOOKUP_AGGREGATION } from "../../server-constants";
-import { BasicSeedModel, Seed, SeedModel } from "./seed.model";
+import { BasicSeedModel, Seed, SeedModel } from "../models/seed.model";
 
 export class SeedService {
     private static seedStorageCollection = new MongoDB_Collection(DATABASE.STORAGE, COLLECTION.SEED_STORAGE);

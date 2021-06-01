@@ -1,8 +1,8 @@
 import * as express from "express";
 import { Router, Request, Response } from "express";
-import { API_ROUTE_BEGIN } from "../../server-constants";
-import { BasicSeedModel, UpdateSeedRequest } from "./seed.model";
-import { SeedService } from "./seed.service";
+import { API_ROUTE_BEGIN } from "../server-constants";
+import { BasicSeedModel, UpdateSeedRequest } from "./models/seed.model";
+import { SeedService } from "./services/seed.service";
 
 export const SeedRouter: Router = express.Router();
 

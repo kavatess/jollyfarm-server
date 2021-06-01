@@ -1,6 +1,6 @@
 import { ObjectId } from "bson";
-import { MongoDB_Collection } from "../../configs/mongodb-collection.config";
-import { COLLECTION, DATABASE, PLANT_LOOKUP_AGGREGATION } from "../../server-constants";
+import { MongoDB_Collection } from "../configs/mongodb-collection.config";
+import { COLLECTION, DATABASE, PLANT_LOOKUP_AGGREGATION } from "../server-constants";
 import { BasicHistoryModel } from "./history.model";
 
 export class HistoryService {

@@ -1,7 +1,7 @@
 import * as express from "express";
 import { Router, Request, Response } from "express";
 import { CreateTrussRequest, NewStatusRequest, RevertTrussRequest, UpdateMaxHoleRequest } from "./models/truss.request.model";
-import { API_ROUTE_BEGIN } from "../../server-constants";
+import { API_ROUTE_BEGIN } from "../server-constants";
 import { getRawTrussArr, getTrussArrByBlock } from "./services/get-truss-arr.service";
 import { getStatistics } from "./services/get-statistics.service";
 import { updateTrussStatus } from "./services/update-truss-status.service";
@@ -42,9 +42,6 @@ TrussRouter.post(API_ROUTE_BEGIN + '/truss/statistics', async (req: Request, res
 
 TrussRouter.post(API_ROUTE_BEGIN + '/truss/status/update', async (req: Request, res: Response) => {
     try {
-        if (new Date(req.body.date).toString() == "Invalid Date") {
-            throw new Error('Invalid Date');
-        }
         const response = await updateTrussStatus(req.body as NewStatusRequest);
         res.json(response);
     } catch (err) {
@@ -53,21 +50,37 @@ TrussRouter.post(API_ROUTE_BEGIN + '/truss/status/update', async (req: Request, 
 });
 
 TrussRouter.post(API_ROUTE_BEGIN + '/truss/create', async (req: Request, res: Response) => {
-    const response = await createSeason(req.body as CreateTrussRequest);
-    res.json(response);
+    try {
+        const response = await createSeason(req.body as CreateTrussRequest);
+        res.json(response);
+    } catch (err) {
+        res.sendStatus(405)
+    }
 });
 
 TrussRouter.post(API_ROUTE_BEGIN + '/truss/clear/:id', async (req: Request, res: Response) => {
-    const response = await clearTruss(req.params.id || '');
-    res.json(response);
+    try {
+        const response = await clearTruss(req.params.id || '');
+        res.json(response);
+    } catch (err) {
+        res.sendStatus(405)
+    }
 });
 
 TrussRouter.post(API_ROUTE_BEGIN + '/truss/maxhole/update', async (req: Request, res: Response) => {
-    const response = await updateTrussMaxHole(req.body as UpdateMaxHoleRequest);
-    res.json(response);
+    try {
+        const response = await updateTrussMaxHole(req.body as UpdateMaxHoleRequest);
+        res.json(response);
+    } catch (err) {
+        res.sendStatus(405)
+    }
 });
 
 TrussRouter.post(API_ROUTE_BEGIN + '/truss/status/revert', async (req: Request, res: Response) => {
-    const response = await revertTrussStatus(req.body as RevertTrussRequest);
-    res.json(response);
+    try {
+        const response = await revertTrussStatus(req.body as RevertTrussRequest);
+        res.json(response);
+    } catch (err) {
+        res.sendStatus(405)
+    }
 });

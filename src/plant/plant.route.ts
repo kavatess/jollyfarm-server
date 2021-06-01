@@ -1,6 +1,6 @@
 import * as express from "express";
 import { Router, Request, Response } from "express";
-import { API_ROUTE_BEGIN } from "../../server-constants";
+import { API_ROUTE_BEGIN } from "../server-constants";
 import { PlantModel } from "./plant.model";
 import { PlantService } from "./plant.service";
 

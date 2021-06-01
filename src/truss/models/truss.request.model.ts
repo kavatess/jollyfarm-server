@@ -1,7 +1,6 @@
 export interface CreateTrussRequest {
     _id: string;
     seedId: string;
-    startDate: string;
 }
 
 export interface UpdateMaxHoleRequest {
@@ -16,7 +15,6 @@ export interface RevertTrussRequest {
 
 export interface NewStatusRequest {
     _id: string;
-    date: Date;
     plantNumber: number;
     plantGrowth: number;
 }

@@ -1,6 +1,6 @@
 import { ObjectId } from "bson";
 import { floor } from "mathjs";
-import { Plant, PlantModel } from "../plant/plant.model";
+import { Plant, PlantModel } from "../../plant/plant.model";
 
 export interface UpdateSeedRequest {
     _id: string;

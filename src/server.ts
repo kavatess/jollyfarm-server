@@ -2,15 +2,13 @@ import express, { Application } from 'express';
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import dotenv from "dotenv";
-import { TrussRouter } from './core/truss/truss.route';
-import { SeedRouter } from './core/seed/seed.route';
-import { PlantRouter } from './core/plant/plant.route';
-import { HistoryRouter } from './core/history/history.route';
 import { AuthRouter } from './auth/authentication.route';
+import { TrussRouter } from './truss/truss.route';
+import { SeedRouter } from './seed/seed.route';
+import { PlantRouter } from './plant/plant.route';
+import { HistoryRouter } from './history/history.route';
 
 // Initialize application variables
-dotenv.config();
 const app: Application = express();
 const PORT = process.env.PORT || 1000;
 const allowedOrigins: string[] = ['http://localhost:4200',

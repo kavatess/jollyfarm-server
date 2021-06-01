@@ -4,10 +4,10 @@ export class Status {
     date: Date;
     plantNumber: number;
     plantGrowth: number;
-    constructor(date: Date = new Date(), plantNumber: number = 0, plantGrowth: number = 0) {
-        this.date = new Date(date);
-        this.plantNumber = Number(plantNumber);
-        this.plantGrowth = Number(plantGrowth);
+    constructor(status: { date?: Date, plantNumber?: number, plantGrowth?: number } = {}) {
+        this.date = status.date ? new Date(status.date) : new Date();
+        this.plantNumber = Number(status.plantNumber || 0);
+        this.plantGrowth = Number(status.plantGrowth || 0);
     }
 }
 
@@ -19,7 +19,7 @@ export interface RawTrussModel {
     plantId: string;
     startDate: string;
     realStatus: Status[];
-    plantType: PlantModel;
+    plantType?: PlantModel;
 }
 
 export class TrussFactory {
@@ -47,10 +47,8 @@ export abstract class Truss {
         this._maxHole = Number(truss.maxHole);
         this._plantId = truss.plantId;
         this._startDate = new Date(truss.startDate);
-        this._realStatus = truss.realStatus.map(sta => new Status(sta.date, sta.plantNumber, sta.plantGrowth));
-        if (this._plantId) {
-            this._plantType = new Plant(truss.plantType);
-        }
+        this._realStatus = truss.realStatus.map(status => new Status(status));
+        this._plantType = truss.plantId ? new Plant(truss.plantType) : undefined;
     }
     // GET
     get id(): string {
@@ -96,8 +94,8 @@ export abstract class Truss {
     setStartDate(startDate: Date): void {
         this._startDate = new Date(startDate);
     }
-    setRealStatus(status: Status[]): void {
-        this._realStatus = status.map(({ date, plantGrowth, plantNumber }) => new Status(date, plantNumber, plantGrowth));
+    setRealStatus(statusArr: Status[]): void {
+        this._realStatus = statusArr.map(status => new Status(status));
     }
     setPlantType(plant: PlantModel): void {
         this._plantType = new Plant(plant);
@@ -188,10 +186,4 @@ export class PlantingTrussInfo extends TrussBasicInfo {
         this.plantColor = truss.plantType.getPlantColor();
         this.numberPerKg = truss.plantType.getNumberPerKg();
     }
-}
-
-export interface Statistic {
-    plantName: string;
-    plantColor: string;
-    plantNumber: number;
 }

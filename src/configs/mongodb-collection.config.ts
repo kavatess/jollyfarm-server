@@ -1,4 +1,5 @@
 import { Collection, Db, ObjectId } from "mongodb";
+import { COLLECTION, DATABASE } from "../server-constants";
 import { MongoDB_Connection } from "./mongodb-connection.config";
 
 export class MongoDB_Collection {
@@ -110,3 +111,5 @@ export class MongoDB_Collection {
         }
     }
 }
+
+export const TRUSS_COLLECTION = new MongoDB_Collection(DATABASE.FARM, COLLECTION.TRUSS);
