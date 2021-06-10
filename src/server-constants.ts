@@ -20,7 +20,7 @@ export const API_ROUTE_BEGIN = '/api/v1';
 // DATABASE NAME
 export enum DATABASE {
     FARM = 'farm-database',
-    STORAGE = 'data-storage',
+    STORAGE = 'storage-database',
     AUTHENTICATION = 'authentication-database'
 };
 // COLLECTION NAME
@@ -29,7 +29,7 @@ export enum COLLECTION {
     PLANT = 'plant',
     SEED = 'seed',
     HISTORY = 'history',
-    SEED_STORAGE = 'seed-nursery-storage',
+    TRUSS_RECORD = 'truss-record',
     USER_INFO = 'user-info'
 };
 // COMMON AGGREGATION METHOD

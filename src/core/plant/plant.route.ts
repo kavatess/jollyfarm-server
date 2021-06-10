@@ -1,7 +1,7 @@
 import * as express from "express";
 import { Router, Request, Response } from "express";
 import { API_ROUTE_BEGIN } from "../../server-constants";
-import { handleInvalidRequestError } from "../../shared/error-handler.service";
+import { handleInvalidRequestError } from "../../shared/services/error-handler.service";
 import { PlantModel } from "./models/plant.model";
 import { deleteOnePlantById } from "./services/delete-plant.service";
 import { getPlantArr } from './services/get-plant-data.service';
@@ -13,7 +13,7 @@ export const PlantRouter: Router = express.Router();
 PlantRouter.post(API_ROUTE_BEGIN + '/plant', async (_req: Request, res: Response) => {
     try {
         const plantArr = await getPlantArr();
-        res.send(plantArr);
+        res.json(plantArr);
     } catch (err) {
         return handleInvalidRequestError(err, res);
     }
@@ -23,7 +23,7 @@ PlantRouter.post(API_ROUTE_BEGIN + '/plant/update', async (req: Request, res: Re
     try {
         const plant: PlantModel = req.body;
         const response = await updatePlant(plant);
-        res.send(response);
+        res.json(response);
     } catch (err) {
         return handleInvalidRequestError(err, res);
     }
@@ -33,7 +33,7 @@ PlantRouter.post(API_ROUTE_BEGIN + '/plant/insert', async (req: Request, res: Re
     try {
         const newPlant: PlantModel = req.body;
         const response = await insertOnePlant(newPlant);
-        res.send(response);
+        res.json(response);
     } catch (err) {
         return handleInvalidRequestError(err, res);
     }
@@ -41,9 +41,9 @@ PlantRouter.post(API_ROUTE_BEGIN + '/plant/insert', async (req: Request, res: Re
 
 PlantRouter.post(API_ROUTE_BEGIN + '/plant/delete/:id', async (req: Request, res: Response) => {
     try {
-        const plantObjId: string = req.params.id;
+        const plantObjId: string = req.params.id || '';
         const response = await deleteOnePlantById(plantObjId);
-        res.send(response);
+        res.json(response);
     } catch (err) {
         return handleInvalidRequestError(err, res);
     }

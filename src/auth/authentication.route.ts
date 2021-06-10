@@ -8,7 +8,8 @@ import { updateUserInfo } from "./services/update-user-info.service";
 import { updateLoginPassword } from "./services/update-login-password.service";
 import { RegisterInfo } from "./models/register-info.model";
 import { UpdateUserBody } from "./models/update-user-body.model";
-import { handleInvalidRequestError, handleUnauthorizedRequestError } from "../shared/error-handler.service";
+import { handleInvalidRequestError, handleUnauthorizedRequestError } from "../shared/services/error-handler.service";
+import { checkTypeOfString } from "../shared/validators/type-check.validator";
 
 export const AuthRouter: Router = express.Router();
 
@@ -37,7 +38,7 @@ AuthRouter.post(AUTH_ROUTE_BEGIN + '/login', async (req: Request, res: Response)
 AuthRouter.post(AUTH_ROUTE_BEGIN + '/register', async (req: Request, res: Response) => {
     try {
         const response = await registerUser(req.body as RegisterInfo);
-        res.send(response);
+        res.json(response);
     } catch (err) {
         return handleInvalidRequestError(err, res);
     }
@@ -46,7 +47,7 @@ AuthRouter.post(AUTH_ROUTE_BEGIN + '/register', async (req: Request, res: Respon
 AuthRouter.post(AUTH_ROUTE_BEGIN + '/user/update', async (req: Request, res: Response) => {
     try {
         const response = await updateUserInfo(req.body as UpdateUserBody);
-        res.send(response);
+        res.json(response);
     } catch (err) {
         return handleInvalidRequestError(err, res);
     }
@@ -55,8 +56,11 @@ AuthRouter.post(AUTH_ROUTE_BEGIN + '/user/update', async (req: Request, res: Res
 AuthRouter.post(AUTH_ROUTE_BEGIN + '/password/update', async (req: Request, res: Response) => {
     try {
         const { phoneNumber, oldPassword, newPassword } = req.body;
+        if (!checkTypeOfString(phoneNumber) || !checkTypeOfString(oldPassword) || !checkTypeOfString(newPassword)) {
+            throw new Error('Invalid request.');
+        }
         const response = await updateLoginPassword(phoneNumber, oldPassword, newPassword);
-        res.send(response);
+        res.json(response);
     } catch (err) {
         return handleInvalidRequestError(err, res);
     }

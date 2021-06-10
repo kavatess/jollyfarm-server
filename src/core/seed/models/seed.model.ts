@@ -2,14 +2,14 @@ import { ObjectId } from "bson";
 import { floor } from "mathjs";
 import { Plant, PlantModel } from "../../plant/models/plant.model";
 
-export interface BasicSeedModel {
+export class BasicSeedModel {
     _id: string;
     plantId: ObjectId;
-    startDate: string;
     plantNumber: number;
 }
 
 export interface SeedModel extends BasicSeedModel {
+    startDate: string;
     plantType: PlantModel;
 }
 
