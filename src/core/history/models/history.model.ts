@@ -1,5 +1,5 @@
 import { Plant, PlantModel } from "../../plant/models/plant.model";
-import { Status } from "../../truss/models/truss.model";
+import { Status } from "../../truss/models/status.model";
 import { BasicHistory } from "./basic-history.model";
 
 export interface HistoryModel extends BasicHistory {
