@@ -20,9 +20,13 @@ export interface Record {
     harvestNumber: number;
 }
 
-export interface HarvestStatByDate {
+export class HarvestStatByDate {
     date: string;
     harvestNumber: number;
+    constructor(date: Date, harvestNumber: number = 0) {
+        this.date = date.toLocaleDateString('en-GB');
+        this.harvestNumber = Number(harvestNumber);
+    }
 }
 
 // export class Record {

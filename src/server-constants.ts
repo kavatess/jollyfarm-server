@@ -33,7 +33,7 @@ export enum COLLECTION {
     USER_INFO = 'user-info'
 };
 // COMMON AGGREGATION METHOD
-export const PLANT_MERGE_LOOKUP_AGGREGATION = [
+export const MERGE_PLANT_LOOKUP_AGGREGATION = [
     {
         $lookup: {
             from: "plant",

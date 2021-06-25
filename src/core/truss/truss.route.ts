@@ -9,8 +9,8 @@ import { clearTruss } from "./services/clear-truss.service";
 import { updateTrussMaxHole } from "./services/update-truss-maxhole.service";
 import { revertTrussStatus } from "./services/revert-truss-status.service";
 import { handleInvalidRequestError } from "../../shared/services/error-handler.service";
-import { checkTypeOfNumber, checkTypeOfString } from "../../shared/validators/type-check.validator";
-import { getHarvestStatsByDate, getHarvestStatsByMonth } from "./services/get-record-stats.service";
+import { checkTypeOfArray, checkTypeOfDate, checkTypeOfNumber, checkTypeOfString } from "../../shared/validators/type-check.validator";
+import { getHarvestStats } from "./services/get-record-stats.service";
 
 export const TrussRouter: Router = express.Router();
 
@@ -109,24 +109,14 @@ TrussRouter.post(API_ROUTE_BEGIN + '/truss/status/revert', async (req: Request, 
     }
 });
 
-TrussRouter.post(API_ROUTE_BEGIN + '/truss/records/date', async (req: Request, res: Response) => {
+TrussRouter.post(API_ROUTE_BEGIN + '/truss/records', async (req: Request, res: Response) => {
     try {
-        const { month, plantId } = req.body;
-        if (!checkTypeOfNumber(month) || !checkTypeOfString(plantId)) {
+        const { month, plantIdArr } = req.body;
+        if (!checkTypeOfDate(month) || !checkTypeOfArray(plantIdArr)) {
             throw new Error('Invalid request.');
         }
-        const harvestStatsByDate = await getHarvestStatsByDate(month, plantId);
-        res.json(harvestStatsByDate);
-    } catch (err) {
-        return handleInvalidRequestError(err, res);
-    }
-});
-
-TrussRouter.post(API_ROUTE_BEGIN + '/truss/records/month/:plantId', async (req: Request, res: Response) => {
-    try {
-        const plantId = req.params.plantId || 'all';
-        const harvestStatsByMonth = await getHarvestStatsByMonth(plantId);
-        res.json(harvestStatsByMonth);
+        const harvestStats = await getHarvestStats(new Date(month), plantIdArr);
+        res.json(harvestStats);
     } catch (err) {
         return handleInvalidRequestError(err, res);
     }
