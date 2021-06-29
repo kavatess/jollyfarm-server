@@ -11,8 +11,7 @@ import { HistoryRouter } from './core/history/history.route';
 // Initialize application variables
 const app: Application = express();
 const PORT = process.env.PORT || 1000;
-const allowedOrigins: string[] = ['http://localhost:4200',
-    'http://yourapp.com', 'http://127.0.0.1:5500'];
+const allowedOrigins: string[] = ['http://localhost:4000', 'https://jollyfarm-app.herokuapp.com'];
 // Activate additional libraries
 app.use(cors({
     origin: function (origin, callback) {
