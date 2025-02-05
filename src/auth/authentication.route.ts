@@ -1,7 +1,7 @@
 import * as express from "express";
 import * as jwt from 'jsonwebtoken';
 import { Router, Request, Response } from "express";
-import { API_ROUTE_BEGIN, AUTH_TOKEN_SECRET, AUTH_ROUTE_BEGIN } from "../server-constants";
+import { API_ROUTE_BEGIN, AUTH_ROUTE_BEGIN } from "../server-constants";
 import { findUser } from "./services/find-user.service";
 import { registerUser } from "./services/register.service";
 import { updateUserInfo } from "./services/update-user-info.service";
@@ -10,6 +10,10 @@ import { RegisterInfo } from "./models/register-info.model";
 import { UpdateUserBody } from "./models/update-user-body.model";
 import { handleInvalidRequestError, handleUnauthorizedRequestError } from "../shared/services/error-handler.service";
 import { checkTypeOfString } from "../shared/validators/type-check.validator";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 export const AuthRouter: Router = express.Router();
 
@@ -17,7 +21,7 @@ AuthRouter.post(API_ROUTE_BEGIN + '/*', async (req: Request, res: Response, next
     try {
         const authToken = req.headers['authorization']?.split(' ')[1];
         if (!authToken) throw new Error("Token does not exist!");
-        jwt.verify(authToken, AUTH_TOKEN_SECRET);
+        jwt.verify(authToken, process.env.AUTH_TOKEN_SECRET);
         next();
     } catch (err) {
         return handleUnauthorizedRequestError(err, res);
@@ -28,7 +32,7 @@ AuthRouter.post(AUTH_ROUTE_BEGIN + '/login', async (req: Request, res: Response)
     try {
         const { phoneNumber, password } = req.body;
         const userInfo = await findUser(phoneNumber, password);
-        const authToken = jwt.sign(userInfo, AUTH_TOKEN_SECRET);
+        const authToken = jwt.sign(userInfo, process.env.AUTH_TOKEN_SECRET);
         res.json({ token: authToken, user: userInfo });
     } catch (err) {
         return handleUnauthorizedRequestError(err, res);
