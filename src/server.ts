@@ -12,22 +12,22 @@ import dotenv from "dotenv";
 // Initialize application variables
 dotenv.config(); // Load environment variables from .env file
 const app: Application = express();
-const PORT = process.env.PORT || 1000;
-// const allowedOrigins: string[] = ['http://localhost:4000', 'http://localhost:4200', 'https://jollyfarm-app.herokuapp.com'];
-// // Activate additional libraries
-// app.use(cors({
-//     origin: function (origin, callback) {
-//         // allow requests with no origin
-//         // (like mobile apps or curl requests)
-//         if (!origin) return callback(null, true);
-//         if (allowedOrigins.indexOf(origin) === -1) {
-//             var msg = 'The CORS policy for this site does not ' +
-//                 'allow access from the specified Origin.';
-//             return callback(new Error(msg), false);
-//         }
-//         return callback(null, true);
-//     }
-// }));
+const PORT = process.env.PORT || 10000;
+const allowedOrigins: string[] = ['http://localhost:4000', 'http://localhost:4200', 'https://jolly-angular.vercel.app'];
+// Activate additional libraries
+app.use(cors({
+    origin: function (origin, callback) {
+        // allow requests with no origin
+        // (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            var msg = 'The CORS policy for this site does not ' +
+                'allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    }
+}));
 app.use(helmet());
 app.use(morgan("common"));
 app.use(express.json());
